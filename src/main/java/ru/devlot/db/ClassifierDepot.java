@@ -1,21 +1,21 @@
 package ru.devlot.db;
 
 import org.springframework.beans.factory.annotation.Required;
-import ru.devlot.model.Factor;
 import ru.devlot.model.Spreadsheet;
 import ru.devlot.model.Vector;
+import ru.devlot.model.factor.*;
+import ru.devlot.model.factor.Class;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LinearRegression;
+import weka.classifiers.functions.SMO;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+
 
 public class ClassifierDepot {
 
@@ -24,6 +24,12 @@ public class ClassifierDepot {
     private Map<Integer, Classifier> classifiers;
 
     private Spreadsheet spreadsheet;
+
+    private static final Map<java.lang.Class<? extends Answer>, Classifier> type2classifier = new HashMap<>();
+    static {
+        type2classifier.put(Regression.class, new LinearRegression());
+        type2classifier.put(Class.class, new SMO());
+    }
 
     public void init() {
         new Thread(() -> {
@@ -46,18 +52,17 @@ public class ClassifierDepot {
     }
 
     public Map<Integer, Double> classify(Map<Integer, Double> features) throws Exception {
-
         Instance instance = new DenseInstance(features.size());
 
         ArrayList<Attribute> attributes = new ArrayList<>();
         for (int i : features.keySet()) {
-            attributes.add(new Attribute(spreadsheet.getFactor(i).name));
+            attributes.add(new Attribute(spreadsheet.getFactor(i).getName()));
             instance.setValue(i, features.get(i));
         }
 
         Map<Integer, Double> answers = new HashMap<>();
         for (int i : classifiers.keySet()) {
-            Attribute attribute = new Attribute(spreadsheet.getFactor(i).name);
+            Attribute attribute = new Attribute(spreadsheet.getFactor(i).getName());
 
             attributes.add(attribute);
 
@@ -80,33 +85,42 @@ public class ClassifierDepot {
         return classifiers;
     }
 
-    private Classifier train(int answerIndex) throws Exception {
-        Map<Integer, Factor> features = spreadsheet.getFeatures();
-        Factor answer = spreadsheet.getAnswers().get(answerIndex);
 
+    private Classifier train(int answerIndex) throws Exception {
+
+        Map<Integer, Feature> features = spreadsheet.getFeatures();
+        Answer answer = spreadsheet.getAnswers().get(answerIndex);
 
         Map<Integer, Attribute> attributes = new TreeMap<>();
         for (int i : features.keySet()) {
-            attributes.put(i, new Attribute(features.get(i).name));
+            attributes.put(i, new Attribute(features.get(i).getName()));
         }
-        attributes.put(answerIndex, new Attribute(answer.name));
+        if (answer instanceof Class) {
+            attributes.put(answerIndex, new Attribute(answer.getName(), ((Class) answer).getClasses()));
+        } else {
+            attributes.put(answerIndex, new Attribute(answer.getName()));
+        }
 
-        Instances learn = new Instances(answer.name, new ArrayList<>(attributes.values()), spreadsheet.size());
+        Instances learn = new Instances(answer.getName(), new ArrayList<>(attributes.values()), spreadsheet.size());
         for (Vector x : spreadsheet) {
             Instance instance = new DenseInstance(features.size() + 1);
             for (int i : attributes.keySet()) {
-                instance.setValue(attributes.get(i), x.get(i));
+                if (spreadsheet.getFactor(i) instanceof Class) {
+                    instance.setValue(attributes.get(i), x.get(i));
+                } else {
+                    instance.setValue(attributes.get(i), x.getDouble(i));
+                }
             }
             learn.add(instance);
         }
         learn.setClassIndex(features.size());
         System.out.println(learn);
 
-        Classifier classifier = new LinearRegression();
+        Classifier classifier = type2classifier.get(answer.getClass());
         classifier.buildClassifier(learn);
 
         Evaluation evaluation = new Evaluation(learn);
-        evaluation.evaluateModel(classifier, learn);
+        evaluation.crossValidateModel(classifier, learn, 2, new Random());
         System.out.println(evaluation.toSummaryString());
 
         return classifier;

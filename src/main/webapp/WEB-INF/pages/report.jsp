@@ -1,4 +1,5 @@
-<%@ page import="ru.devlot.model.Factor" %>
+<%@ page import="ru.devlot.model.factor.Class" %>
+<%@ page import="ru.devlot.model.factor.Factor" %>
 <%@ page import="java.util.Map" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
@@ -17,8 +18,8 @@
             for (int i : features.keySet()) {
         %>
                 <p>
-                    <%= features.get(i).name %>:
-                    <%= values.get(i).intValue() %> <%= features.get(i).dimension %>
+                    <%= features.get(i).getName() %>:
+                    <%= values.get(i).intValue() %> <%= features.get(i).getDimension() %>
                 </p>
         <%
             }
@@ -29,8 +30,23 @@
             for (int i : answers.keySet()) {
         %>
                 <p>
-                    <%= answers.get(i).name %>:
-                    <%= values.get(i).intValue() %> <%= answers.get(i).dimension %>
+                    <%= answers.get(i).getName() %>:
+                <%
+                    if (answers.get(i) instanceof Class)  {
+                %>
+                        <%= ((Class) answers.get(i)).getClasses().get(values.get(i).intValue()) %>
+                <%
+                    } else {
+                %>
+                        <%= values.get(i).intValue() %>
+                <%
+                    }
+                    if (answers.get(i).getDimension() != null) {
+                %>
+                        <%= answers.get(i).getDimension() %>
+                <%
+                    }
+                %>
                 </p>
         <%
             }

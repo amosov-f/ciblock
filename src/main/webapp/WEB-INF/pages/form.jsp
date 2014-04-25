@@ -3,7 +3,7 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<%@ page import="ru.devlot.model.Factor" %>
+<%@ page import="ru.devlot.model.factor.Factor" %>
 <%@ page import="java.util.Map" %>
 
 <!DOCTYPE html>
@@ -34,9 +34,9 @@
             for (int i : features.keySet()) {
         %>
                 <div class="input-group">
-                    <span class="input-group-addon"><%= features.get(i).name %></span>
+                    <span class="input-group-addon"><%= features.get(i).getName() %></span>
                     <input id="<%= i %>" name="feature" type="number" class="form-control">
-                    <span class="input-group-addon"><%= features.get(i).dimension %></span>
+                    <span class="input-group-addon"><%= features.get(i).getDimension() %></span>
                 </div>
                 <br>
         <%

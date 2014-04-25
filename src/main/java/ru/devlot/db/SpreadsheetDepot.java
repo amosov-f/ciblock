@@ -8,9 +8,9 @@ import com.google.gdata.data.spreadsheet.ListEntry;
 import com.google.gdata.data.spreadsheet.ListFeed;
 import com.google.gdata.util.ServiceException;
 import ru.devlot.LotDeveloperEngine;
-import ru.devlot.model.Factor;
 import ru.devlot.model.Spreadsheet;
 import ru.devlot.model.Vector;
+import ru.devlot.model.factor.Factor;
 
 import java.io.IOException;
 import java.net.URL;
@@ -66,7 +66,7 @@ public class SpreadsheetDepot {
         }
 
         for (CellEntry cell : cellFeed.getEntries()) {
-            Factor factor = new Factor(cell.getCell().getValue());
+            Factor factor = Factor.parse(cell.getCell().getValue());
             spreadsheet.addFactor(factor);
         }
 
@@ -76,12 +76,17 @@ public class SpreadsheetDepot {
             Vector vector = new Vector(row.getTitle().getPlainText());
 
             List<String> tags = new ArrayList<>(row.getCustomElements().getTags());
-            tags = tags.subList(1, tags.size());
-            for (String tag : tags) {
-                vector.add(new Double(row.getCustomElements().getValue(tag)));
+            for (String tag : tags.subList(1, tags.size())) {
+                vector.add(row.getCustomElements().getValue(tag));
             }
 
             spreadsheet.add(vector);
+        }
+
+        for (int i : spreadsheet.getClasses().keySet()) {
+            for (Vector x : spreadsheet) {
+                spreadsheet.getClasses().get(i).add(x.get(i));
+            }
         }
 
         return spreadsheet;

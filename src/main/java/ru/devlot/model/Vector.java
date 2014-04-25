@@ -5,27 +5,34 @@ import java.util.List;
 
 public class Vector {
 
-    public final String name;
+    private final String name;
 
-    private final List<Double> values = new ArrayList<>();
-
+    private final List<String> values = new ArrayList<>();
 
     public Vector(String name) {
         this.name = name;
     }
 
-    public void add(double value) {
+    public void add(String value) {
         values.add(value);
     }
 
-    public double get(int i) {
+    public String getName() {
+        return name;
+    }
+
+    public double getDouble(int i) {
+        return new Double(values.get(i));
+    }
+
+    public String get(int i) {
         return values.get(i);
     }
 
     @Override
     public String toString() {
         String s = name + "\t";
-        for (double value : values) {
+        for (String value : values) {
             s += value + "\t";
         }
         return s;

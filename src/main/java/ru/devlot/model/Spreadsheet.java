@@ -1,9 +1,11 @@
 package ru.devlot.model;
 
-import java.util.*;
+import ru.devlot.model.factor.Answer;
+import ru.devlot.model.factor.Factor;
+import ru.devlot.model.factor.Feature;
+import ru.devlot.model.factor.Class;
 
-import static ru.devlot.model.Factor.Type.ANSWER;
-import static ru.devlot.model.Factor.Type.FEATURE;
+import java.util.*;
 
 public class Spreadsheet implements Iterable<Vector> {
 
@@ -23,21 +25,31 @@ public class Spreadsheet implements Iterable<Vector> {
         return factors.get(i);
     }
 
-    public Map<Integer, Factor> getFeatures() {
-        Map<Integer, Factor> features = new HashMap<>();
+    public Map<Integer, Feature> getFeatures() {
+        Map<Integer, Feature> features = new HashMap<>();
         for (int i = 0; i < factors.size(); ++i) {
-            if (factors.get(i).type == FEATURE) {
-                features.put(i, factors.get(i));
+            if (factors.get(i) instanceof Feature) {
+                features.put(i, (Feature) factors.get(i));
             }
         }
         return features;
     }
 
-    public Map<Integer, Factor> getAnswers() {
-        Map<Integer, Factor> answers = new HashMap<>();
+    public Map<Integer, Answer> getAnswers() {
+        Map<Integer, Answer> answers = new HashMap<>();
         for (int i = 0; i < factors.size(); ++i) {
-            if (factors.get(i).type == ANSWER) {
-                answers.put(i, factors.get(i));
+            if (factors.get(i) instanceof Answer) {
+                answers.put(i, (Answer) factors.get(i));
+            }
+        }
+        return answers;
+    }
+
+    public Map<Integer, Class> getClasses() {
+        Map<Integer, Class> answers = new HashMap<>();
+        for (int i = 0; i < factors.size(); ++i) {
+            if (factors.get(i) instanceof Class) {
+                answers.put(i, (Class) factors.get(i));
             }
         }
         return answers;
