@@ -10,4 +10,5 @@ public class Regression extends Answer {
     public String toString() {
         return "$" + super.toString();
     }
+
 }

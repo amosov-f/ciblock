@@ -97,4 +97,5 @@ public class SpreadsheetDepot {
             super(DateTime.now() + ": time of last update " + t + " is very recent");
         }
     }
+
 }

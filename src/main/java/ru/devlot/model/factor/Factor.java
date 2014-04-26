@@ -25,7 +25,6 @@ public class Factor {
         return dimension;
     }
 
-
     public static Factor parse(String description) {
 
         int start = 0;

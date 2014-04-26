@@ -3,8 +3,10 @@ package ru.devlot.db;
 import org.springframework.beans.factory.annotation.Required;
 import ru.devlot.model.Spreadsheet;
 import ru.devlot.model.Vector;
-import ru.devlot.model.factor.*;
+import ru.devlot.model.factor.Answer;
 import ru.devlot.model.factor.Class;
+import ru.devlot.model.factor.Feature;
+import ru.devlot.model.factor.Regression;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LinearRegression;
@@ -25,10 +27,10 @@ public class ClassifierDepot {
 
     private Spreadsheet spreadsheet;
 
-    private static final Map<java.lang.Class<? extends Answer>, Classifier> type2classifier = new HashMap<>();
+    private static final Map<java.lang.Class<? extends Answer>, java.lang.Class<? extends Classifier>> type2classifier = new HashMap<>();
     static {
-        type2classifier.put(Regression.class, new LinearRegression());
-        type2classifier.put(Class.class, new SMO());
+        type2classifier.put(Regression.class, LinearRegression.class);
+        type2classifier.put(Class.class, SMO.class);
     }
 
     public void init() {
@@ -80,14 +82,17 @@ public class ClassifierDepot {
     private Map<Integer, Classifier> train() throws Exception {
         Map<Integer, Classifier> classifiers = new HashMap<>();
         for (int i : spreadsheet.getAnswers().keySet()) {
-            classifiers.put(i, train(i));
+            Classifier classifier = train(i);
+            classifiers.put(i, classifier);
+            System.out.println(i + ": " + classifier);
+            System.out.println(classifiers);
         }
+
         return classifiers;
     }
 
 
     private Classifier train(int answerIndex) throws Exception {
-
         Map<Integer, Feature> features = spreadsheet.getFeatures();
         Answer answer = spreadsheet.getAnswers().get(answerIndex);
 
@@ -102,9 +107,13 @@ public class ClassifierDepot {
         }
 
         Instances learn = new Instances(answer.getName(), new ArrayList<>(attributes.values()), spreadsheet.size());
+        a:
         for (Vector x : spreadsheet) {
             Instance instance = new DenseInstance(features.size() + 1);
             for (int i : attributes.keySet()) {
+                if (!x.contains(i)) {
+                    continue a;
+                }
                 if (spreadsheet.getFactor(i) instanceof Class) {
                     instance.setValue(attributes.get(i), x.get(i));
                 } else {
@@ -116,7 +125,7 @@ public class ClassifierDepot {
         learn.setClassIndex(features.size());
         System.out.println(learn);
 
-        Classifier classifier = type2classifier.get(answer.getClass());
+        Classifier classifier = type2classifier.get(answer.getClass()).getConstructor().newInstance();
         classifier.buildClassifier(learn);
 
         Evaluation evaluation = new Evaluation(learn);

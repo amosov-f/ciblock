@@ -76,4 +76,5 @@ public class Spreadsheet implements Iterable<Vector> {
     public Iterator<Vector> iterator() {
         return vectors.iterator();
     }
+
 }

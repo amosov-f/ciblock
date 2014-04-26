@@ -5,20 +5,20 @@ import java.util.List;
 
 public class Vector {
 
-    private final String name;
+    private final String id;
 
     private final List<String> values = new ArrayList<>();
 
-    public Vector(String name) {
-        this.name = name;
+    public Vector(String id) {
+        this.id = id;
     }
 
     public void add(String value) {
         values.add(value);
     }
 
-    public String getName() {
-        return name;
+    public String getId() {
+        return id;
     }
 
     public double getDouble(int i) {
@@ -29,12 +29,17 @@ public class Vector {
         return values.get(i);
     }
 
+    public boolean contains(int i) {
+        return values.get(i) != null && !values.get(i).isEmpty();
+    }
+
     @Override
     public String toString() {
-        String s = name + "\t";
+        String s = id + "\t";
         for (String value : values) {
             s += value + "\t";
         }
         return s;
     }
+
 }
