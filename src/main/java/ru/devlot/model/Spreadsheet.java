@@ -55,6 +55,10 @@ public class Spreadsheet implements Iterable<Vector> {
         return answers;
     }
 
+    public List<Factor> getFactors() {
+        return factors;
+    }
+
     public int size() {
         return vectors.size();
     }

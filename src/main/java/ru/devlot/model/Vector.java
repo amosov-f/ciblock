@@ -17,10 +17,6 @@ public class Vector {
         values.add(value);
     }
 
-    public String getId() {
-        return id;
-    }
-
     public double getDouble(int i) {
         return new Double(values.get(i));
     }

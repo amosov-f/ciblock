@@ -5,7 +5,7 @@ import ru.devlot.model.Spreadsheet;
 import ru.devlot.model.Vector;
 import ru.devlot.model.factor.Answer;
 import ru.devlot.model.factor.Class;
-import ru.devlot.model.factor.Feature;
+import ru.devlot.model.factor.Factor;
 import ru.devlot.model.factor.Regression;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -26,6 +26,7 @@ public class ClassifierDepot {
     private Map<Integer, Classifier> classifiers;
 
     private Spreadsheet spreadsheet;
+    private List<Attribute> attributes;
 
     private static final Map<java.lang.Class<? extends Answer>, java.lang.Class<? extends Classifier>> type2classifier = new HashMap<>();
     static {
@@ -37,7 +38,9 @@ public class ClassifierDepot {
         new Thread(() -> {
             while (!Thread.interrupted()) {
                 spreadsheet = spreadsheetDepot.getSpreadsheet();
+
                 try {
+                    attributes = getAttributes();
                     classifiers = train();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -55,25 +58,16 @@ public class ClassifierDepot {
 
     public Map<Integer, Double> classify(Map<Integer, Double> features) throws Exception {
         Instance instance = new DenseInstance(features.size());
-
-        ArrayList<Attribute> attributes = new ArrayList<>();
         for (int i : features.keySet()) {
-            attributes.add(new Attribute(spreadsheet.getFactor(i).getName()));
-            instance.setValue(i, features.get(i));
+            instance.setValue(attributes.get(i), features.get(i));
         }
 
+        Instances test = new Instances("test", new ArrayList<>(attributes), 1);
+        test.add(instance);
+
         Map<Integer, Double> answers = new HashMap<>();
-        for (int i : classifiers.keySet()) {
-            Attribute attribute = new Attribute(spreadsheet.getFactor(i).getName());
-
-            attributes.add(attribute);
-
-            Instances test = new Instances("test", attributes, 1);
-            test.add(instance);
-
-            answers.put(i, classifiers.get(i).classifyInstance(instance));
-
-            attributes.remove(attribute);
+        for (int answerIndex : classifiers.keySet()) {
+            answers.put(answerIndex, classifiers.get(answerIndex).classifyInstance(instance));
         }
 
         return answers;
@@ -93,46 +87,55 @@ public class ClassifierDepot {
 
 
     private Classifier train(int answerIndex) throws Exception {
-        Map<Integer, Feature> features = spreadsheet.getFeatures();
         Answer answer = spreadsheet.getAnswers().get(answerIndex);
 
-        Map<Integer, Attribute> attributes = new TreeMap<>();
-        for (int i : features.keySet()) {
-            attributes.put(i, new Attribute(features.get(i).getName()));
-        }
-        if (answer instanceof Class) {
-            attributes.put(answerIndex, new Attribute(answer.getName(), ((Class) answer).getClasses()));
-        } else {
-            attributes.put(answerIndex, new Attribute(answer.getName()));
-        }
-
-        Instances learn = new Instances(answer.getName(), new ArrayList<>(attributes.values()), spreadsheet.size());
-        a:
+        Instances learn = new Instances(answer.getName(), new ArrayList<>(attributes), spreadsheet.size());
         for (Vector x : spreadsheet) {
-            Instance instance = new DenseInstance(features.size() + 1);
-            for (int i : attributes.keySet()) {
-                if (!x.contains(i)) {
-                    continue a;
-                }
-                if (spreadsheet.getFactor(i) instanceof Class) {
-                    instance.setValue(attributes.get(i), x.get(i));
-                } else {
-                    instance.setValue(attributes.get(i), x.getDouble(i));
-                }
+            Instance instance = toInstance(x, answerIndex);
+            if (instance != null) {
+                learn.add(instance);
             }
-            learn.add(instance);
         }
-        learn.setClassIndex(features.size());
+        learn.setClass(attributes.get(answerIndex));
+
         System.out.println(learn);
 
         Classifier classifier = type2classifier.get(answer.getClass()).getConstructor().newInstance();
         classifier.buildClassifier(learn);
 
         Evaluation evaluation = new Evaluation(learn);
-        evaluation.crossValidateModel(classifier, learn, 2, new Random());
+        evaluation.crossValidateModel(classifier, learn, 3, new Random());
         System.out.println(evaluation.toSummaryString());
 
         return classifier;
+    }
+
+    private List<Attribute> getAttributes() {
+        List<Attribute> attributes = new ArrayList<>();
+        for (Factor factor : spreadsheet.getFactors()) {
+            attributes.add(new Attribute(factor.getName()));
+        }
+        return attributes;
+    }
+
+    private Instance toInstance(Vector x, int answerIndex) {
+        if (!x.contains(answerIndex)) {
+            return null;
+        }
+
+        Instance instance = new DenseInstance(attributes.size());
+        for (int i : spreadsheet.getFeatures().keySet()) {
+            instance.setValue(attributes.get(i), x.getDouble(i));
+
+        }
+
+        if (spreadsheet.getFactor(answerIndex) instanceof Class) {
+            instance.setValue(attributes.get(answerIndex), x.get(answerIndex));
+        } else {
+            instance.setValue(attributes.get(answerIndex), x.getDouble(answerIndex));
+        }
+
+        return instance;
     }
 
     public Spreadsheet getSpreadsheet() {
