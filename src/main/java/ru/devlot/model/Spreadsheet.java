@@ -63,6 +63,41 @@ public class Spreadsheet implements Iterable<Vector> {
         return vectors.size();
     }
 
+    public List<String> get(String name) {
+        int factorIndex = getFactorIndex(name);
+        if (factorIndex == -1) {
+            return null;
+        }
+
+        List<String> values = new ArrayList<>();
+        for (Vector x : this) {
+            values.add(x.get(factorIndex));
+        }
+        return values;
+    }
+
+    public List<Double> getDoubles(String name) {
+        int factorIndex = getFactorIndex(name);
+        if (factorIndex == -1) {
+            return null;
+        }
+
+        List<Double> values = new ArrayList<>();
+        for (Vector x : this) {
+            values.add(x.getDouble(factorIndex));
+        }
+        return values;
+    }
+
+    public int getFactorIndex(String name) {
+        for (int i = 0; i < factors.size(); ++i) {
+            if (factors.get(i).getName().equals(name)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     @Override
     public String toString() {
         String s = "name\t";

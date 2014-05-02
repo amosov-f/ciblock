@@ -17,7 +17,7 @@
     <bean id="spreadsheetDepot" class="ru.devlot.db.SpreadsheetDepot">
     </bean>
 
-    <bean id="trainer" class="ru.devlot.db.ClassifierDepot" init-method="init">
+    <bean id="classifierDepot" class="ru.devlot.db.ClassifierDepot" init-method="init">
         <property name="spreadsheetDepot" ref="spreadsheetDepot"/>
     </bean>
 
