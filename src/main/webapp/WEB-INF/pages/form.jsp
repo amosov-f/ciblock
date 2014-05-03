@@ -159,7 +159,7 @@
                 },
                 zAxis: {
                     min: 0,
-                    max: 4000,
+                    max: 5000,
                     title: {
                         enabled: true,
                         text: 'Периметр'
