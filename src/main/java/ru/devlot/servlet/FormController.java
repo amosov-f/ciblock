@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.devlot.db.ClassifierDepot;
+import ru.devlot.db.NearestNeighbourDepot;
 import ru.devlot.model.Spreadsheet;
 
 import java.util.HashMap;
@@ -18,15 +19,14 @@ public class FormController {
     @Autowired
     ClassifierDepot classifierDepot;
 
+    @Autowired
+    NearestNeighbourDepot nearestNeighbourDepot;
+
     @RequestMapping("/")
     public String form(Model model) {
-        Spreadsheet spreadsheet = classifierDepot.getSpreadsheet();
+        Spreadsheet spreadsheet = classifierDepot.get();
 
         model.addAttribute("features", spreadsheet.getFeatures());
-
-        model.addAttribute("squares", spreadsheet.getDoubles("площадь"));
-        model.addAttribute("altitudes", spreadsheet.getDoubles("высота"));
-        model.addAttribute("perimeters", spreadsheet.getDoubles("периметр"));
 
         return "form";
     }
@@ -38,7 +38,7 @@ public class FormController {
             features.put(new Integer(entry.getKey()), new Double(entry.getValue()));
         }
 
-        Spreadsheet spreadsheet = classifierDepot.getSpreadsheet();
+        Spreadsheet spreadsheet = classifierDepot.get();
 
         model.addAttribute("features", spreadsheet.getFeatures());
         model.addAttribute("answers", spreadsheet.getAnswers());
@@ -47,11 +47,7 @@ public class FormController {
         values.putAll(classifierDepot.classify(features));
         model.addAttribute("values", values);
 
-        System.out.println(model);
-
-        //System.out.println(spreadsheet.getDoubles("площадь"));
-        //System.out.println(spreadsheet.getDoubles("высота"));
-        //System.out.println(spreadsheet.getDoubles("периметр"));
+        model.addAttribute("nearestNeighbours", nearestNeighbourDepot.getKNearestNeighbours(features, 3));
 
         return "report";
     }

@@ -25,4 +25,5 @@ public class Class extends Answer {
     public String toString() {
         return "#" + super.toString();
     }
+
 }

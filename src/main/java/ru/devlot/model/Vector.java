@@ -29,6 +29,10 @@ public class Vector {
         return values.get(i) != null && !values.get(i).isEmpty();
     }
 
+    public String getId() {
+        return id;
+    }
+
     @Override
     public String toString() {
         String s = id + "\t";

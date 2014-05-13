@@ -26,7 +26,6 @@ public class Factor {
     }
 
     public static Factor parse(String description) {
-
         int start = 0;
         if (description.startsWith(REGRESSION_PREFIX)) {
             start = REGRESSION_PREFIX.length();
@@ -62,4 +61,5 @@ public class Factor {
     public String toString() {
         return name + " [" + dimension + "]";
     }
+
 }

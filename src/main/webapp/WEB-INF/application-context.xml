@@ -14,11 +14,20 @@
         <constructor-arg ref="dataSource"/>
     </bean>
 
-    <bean id="spreadsheetDepot" class="ru.devlot.db.SpreadsheetDepot">
+    <bean id="dataDepot" class="ru.devlot.db.spreadsheet.DataDepot">
+    </bean>
+
+    <bean id="infoDepot" class="ru.devlot.db.spreadsheet.InfoDepot">
     </bean>
 
     <bean id="classifierDepot" class="ru.devlot.db.ClassifierDepot" init-method="init">
-        <property name="spreadsheetDepot" ref="spreadsheetDepot"/>
+        <property name="dataDepot" ref="dataDepot"/>
+    </bean>
+
+    <bean id="nearestNeighbourDepot" class="ru.devlot.db.NearestNeighbourDepot" init-method="init">
+
+        <property name="dataDepot" ref="dataDepot"/>
+        <property name="infoDepot" ref="infoDepot"/>
     </bean>
 
 </beans>

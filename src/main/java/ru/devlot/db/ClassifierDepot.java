@@ -1,6 +1,7 @@
 package ru.devlot.db;
 
 import org.springframework.beans.factory.annotation.Required;
+import ru.devlot.db.spreadsheet.DataDepot;
 import ru.devlot.model.Spreadsheet;
 import ru.devlot.model.Vector;
 import ru.devlot.model.factor.Answer;
@@ -21,11 +22,11 @@ import java.util.*;
 
 public class ClassifierDepot {
 
-    private SpreadsheetDepot spreadsheetDepot;
+    private DataDepot dataDepot;
 
     private Map<Integer, Classifier> classifiers;
 
-    private Spreadsheet spreadsheet;
+    private Spreadsheet data;
     private List<Attribute> attributes;
 
     private static final Map<java.lang.Class<? extends Answer>, java.lang.Class<? extends Classifier>> type2classifier = new HashMap<>();
@@ -37,7 +38,7 @@ public class ClassifierDepot {
     public void init() {
         new Thread(() -> {
             while (!Thread.interrupted()) {
-                spreadsheet = spreadsheetDepot.getSpreadsheet();
+                data = dataDepot.get();
 
                 try {
                     attributes = getAttributes();
@@ -75,7 +76,7 @@ public class ClassifierDepot {
 
     private Map<Integer, Classifier> train() throws Exception {
         Map<Integer, Classifier> classifiers = new HashMap<>();
-        for (int i : spreadsheet.getAnswers().keySet()) {
+        for (int i : data.getAnswers().keySet()) {
             Classifier classifier = train(i);
             classifiers.put(i, classifier);
             System.out.println(i + ": " + classifier);
@@ -87,10 +88,10 @@ public class ClassifierDepot {
 
 
     private Classifier train(int answerIndex) throws Exception {
-        Answer answer = spreadsheet.getAnswers().get(answerIndex);
+        Answer answer = data.getAnswers().get(answerIndex);
 
-        Instances learn = new Instances(answer.getName(), new ArrayList<>(attributes), spreadsheet.size());
-        for (Vector x : spreadsheet) {
+        Instances learn = new Instances(answer.getName(), new ArrayList<>(attributes), data.size());
+        for (Vector x : data) {
             Instance instance = toInstance(x, answerIndex);
             if (instance != null) {
                 learn.add(instance);
@@ -112,7 +113,7 @@ public class ClassifierDepot {
 
     private List<Attribute> getAttributes() {
         List<Attribute> attributes = new ArrayList<>();
-        for (Factor factor : spreadsheet.getFactors()) {
+        for (Factor factor : data.getFactors()) {
             attributes.add(new Attribute(factor.getName()));
         }
         return attributes;
@@ -124,12 +125,12 @@ public class ClassifierDepot {
         }
 
         Instance instance = new DenseInstance(attributes.size());
-        for (int i : spreadsheet.getFeatures().keySet()) {
+        for (int i : data.getFeatures().keySet()) {
             instance.setValue(attributes.get(i), x.getDouble(i));
 
         }
 
-        if (spreadsheet.getFactor(answerIndex) instanceof Class) {
+        if (data.getFactor(answerIndex) instanceof Class) {
             instance.setValue(attributes.get(answerIndex), x.get(answerIndex));
         } else {
             instance.setValue(attributes.get(answerIndex), x.getDouble(answerIndex));
@@ -138,13 +139,13 @@ public class ClassifierDepot {
         return instance;
     }
 
-    public Spreadsheet getSpreadsheet() {
-        return spreadsheet;
+    public Spreadsheet get() {
+        return data;
     }
 
     @Required
-    public void setSpreadsheetDepot(SpreadsheetDepot spreadsheetDepot) {
-        this.spreadsheetDepot = spreadsheetDepot;
+    public void setDataDepot(DataDepot dataDepot) {
+        this.dataDepot = dataDepot;
     }
 
 }

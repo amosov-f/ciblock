@@ -25,6 +25,15 @@ public class Spreadsheet implements Iterable<Vector> {
         return factors.get(i);
     }
 
+    public Vector get(String id) {
+        for (Vector x : this) {
+            if (x.getId().equals(id)) {
+                return x;
+            }
+        }
+        return null;
+    }
+
     public Map<Integer, Feature> getFeatures() {
         Map<Integer, Feature> features = new HashMap<>();
         for (int i = 0; i < factors.size(); ++i) {
@@ -63,7 +72,7 @@ public class Spreadsheet implements Iterable<Vector> {
         return vectors.size();
     }
 
-    public List<String> get(String name) {
+    public List<String> getColumn(String name) {
         int factorIndex = getFactorIndex(name);
         if (factorIndex == -1) {
             return null;
@@ -100,9 +109,12 @@ public class Spreadsheet implements Iterable<Vector> {
 
     @Override
     public String toString() {
+
+
+
         String s = "name\t";
         for (Factor factor : factors) {
-            s += factor + "\t";
+            s += factor.toString() + "\t";
         }
         s += "\n";
         for (Vector x : vectors) {

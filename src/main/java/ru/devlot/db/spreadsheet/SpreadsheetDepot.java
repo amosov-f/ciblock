@@ -1,4 +1,4 @@
-package ru.devlot.db;
+package ru.devlot.db.spreadsheet;
 
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.DateTime;
@@ -17,20 +17,22 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class SpreadsheetDepot {
 
     private Spreadsheet spreadsheet;
 
+    private final String key;
+
     private static final long SLEEP_TIME = 60000;
     private static final long RECENT_TIME = 60000;
 
+    public SpreadsheetDepot(String key) {
+        this.key = key;
 
-    public SpreadsheetDepot() {
         new Thread(() -> {
             while (!Thread.interrupted()) {
                 try {
-                    this.spreadsheet = uploadSpreadsheet();
+                    this.spreadsheet = upload();
                 } catch (RecentUpdateException e) {
                     e.printStackTrace(System.out);
                 } catch (ServiceException | IOException e) {
@@ -48,17 +50,17 @@ public class SpreadsheetDepot {
         }).start();
     }
 
-    public Spreadsheet getSpreadsheet() {
+    public Spreadsheet get() {
         return spreadsheet;
     }
 
-    public Spreadsheet uploadSpreadsheet() throws ServiceException, IOException, RecentUpdateException {
+    public Spreadsheet upload() throws ServiceException, IOException, RecentUpdateException {
         SpreadsheetService service = new SpreadsheetService("devlot-1.0.0");
         service.setUserCredentials(LotDeveloperEngine.username, LotDeveloperEngine.password);
         service.setProtocolVersion(SpreadsheetService.Versions.V3);
 
         Spreadsheet spreadsheet = new Spreadsheet();
-        URL cellFeedUrl = new URL("https://spreadsheets.google.com/feeds/cells/tC-ZyoR2ayny8PP0JKBUDLw/od6/private/full?max-row=1&min-col=2");
+        URL cellFeedUrl = new URL("https://spreadsheets.google.com/feeds/cells/" + key + "/od6/private/full?max-row=1&min-col=2");
         CellFeed cellFeed = service.getFeed(cellFeedUrl, CellFeed.class);
 
         if (DateTime.now().getValue() - cellFeed.getUpdated().getValue() < RECENT_TIME) {
@@ -66,11 +68,13 @@ public class SpreadsheetDepot {
         }
 
         for (CellEntry cell : cellFeed.getEntries()) {
-            Factor factor = Factor.parse(cell.getCell().getValue());
+            String description = cell.getCell().getValue();
+
+            Factor factor = Factor.parse(description);
             spreadsheet.addFactor(factor);
         }
 
-        URL listFeedUrl = new URL("https://spreadsheets.google.com/feeds/list/tC-ZyoR2ayny8PP0JKBUDLw/od6/private/full");
+        URL listFeedUrl = new URL("https://spreadsheets.google.com/feeds/list/" + key + "/od6/private/full");
         ListFeed listFeed = service.getFeed(listFeedUrl, ListFeed.class);
         for (ListEntry row : listFeed.getEntries()) {
             Vector vector = new Vector(row.getTitle().getPlainText());
