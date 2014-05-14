@@ -10,7 +10,7 @@ import com.google.gdata.util.ServiceException;
 import ru.devlot.LotDeveloperEngine;
 import ru.devlot.model.Spreadsheet;
 import ru.devlot.model.Vector;
-import ru.devlot.model.factor.Factor;
+import ru.devlot.model.Factor;
 
 import java.io.IOException;
 import java.net.URL;
@@ -97,9 +97,11 @@ public class SpreadsheetDepot {
     }
 
     public class RecentUpdateException extends Exception {
+
         public RecentUpdateException(DateTime t) {
             super(DateTime.now() + ": time of last update " + t + " is very recent");
         }
+
     }
 
 }

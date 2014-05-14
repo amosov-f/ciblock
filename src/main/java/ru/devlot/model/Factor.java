@@ -1,5 +1,9 @@
-package ru.devlot.model.factor;
+package ru.devlot.model;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,7 +63,62 @@ public class Factor {
 
     @Override
     public String toString() {
+        if (dimension == null) {
+            return name;
+        }
         return name + " [" + dimension + "]";
+    }
+
+    public static class Feature extends Factor {
+
+        protected Feature(String name, String dimension) {
+            super(name, dimension);
+        }
+
+    }
+
+    public static class Answer extends Factor {
+
+        protected Answer(String name, String dimension) {
+            super(name, dimension);
+        }
+
+    }
+
+    public static class Regression extends Answer {
+
+        protected Regression(String name, String dimension) {
+            super(name, dimension);
+        }
+
+        @Override
+        public String toString() {
+            return "$" + super.toString();
+        }
+
+    }
+
+    public static class Class extends Answer {
+
+        private final Set<String> classes = new HashSet<>();
+
+        protected Class(String name, String dimension) {
+            super(name, dimension);
+        }
+
+        public void add(String newClass) {
+            classes.add(newClass);
+        }
+
+        public List<String> getClasses() {
+            return new ArrayList<>(classes);
+        }
+
+        @Override
+        public String toString() {
+            return "#" + super.toString();
+        }
+
     }
 
 }

@@ -1,11 +1,10 @@
 package ru.devlot.model;
 
-import ru.devlot.model.factor.Answer;
-import ru.devlot.model.factor.Factor;
-import ru.devlot.model.factor.Feature;
-import ru.devlot.model.factor.Class;
-
 import java.util.*;
+
+import static ru.devlot.model.Factor.Answer;
+import static ru.devlot.model.Factor.Feature;
+import static ru.devlot.model.Factor.Class;
 
 public class Spreadsheet implements Iterable<Vector> {
 
@@ -45,7 +44,7 @@ public class Spreadsheet implements Iterable<Vector> {
     }
 
     public Map<Integer, Answer> getAnswers() {
-        Map<Integer, Answer> answers = new HashMap<>();
+        Map<Integer, Factor.Answer> answers = new HashMap<>();
         for (int i = 0; i < factors.size(); ++i) {
             if (factors.get(i) instanceof Answer) {
                 answers.put(i, (Answer) factors.get(i));
@@ -109,9 +108,6 @@ public class Spreadsheet implements Iterable<Vector> {
 
     @Override
     public String toString() {
-
-
-
         String s = "name\t";
         for (Factor factor : factors) {
             s += factor.toString() + "\t";

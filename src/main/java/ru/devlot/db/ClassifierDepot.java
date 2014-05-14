@@ -4,10 +4,10 @@ import org.springframework.beans.factory.annotation.Required;
 import ru.devlot.db.spreadsheet.DataDepot;
 import ru.devlot.model.Spreadsheet;
 import ru.devlot.model.Vector;
-import ru.devlot.model.factor.Answer;
-import ru.devlot.model.factor.Class;
-import ru.devlot.model.factor.Factor;
-import ru.devlot.model.factor.Regression;
+import ru.devlot.model.Factor.Answer;
+import ru.devlot.model.Factor.Class;
+import ru.devlot.model.Factor;
+import ru.devlot.model.Factor.Regression;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LinearRegression;
@@ -29,7 +29,10 @@ public class ClassifierDepot {
     private Spreadsheet data;
     private List<Attribute> attributes;
 
-    private static final Map<java.lang.Class<? extends Answer>, java.lang.Class<? extends Classifier>> type2classifier = new HashMap<>();
+    private static final Map<
+            java.lang.Class<? extends Answer>,
+            java.lang.Class<? extends Classifier>
+    > type2classifier = new HashMap<>();
     static {
         type2classifier.put(Regression.class, LinearRegression.class);
         type2classifier.put(Class.class, SMO.class);

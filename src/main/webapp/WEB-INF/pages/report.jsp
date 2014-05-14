@@ -1,6 +1,5 @@
-<%@ page import="ru.devlot.model.Vector" %>
-<%@ page import="ru.devlot.model.factor.Class" %>
-<%@ page import="ru.devlot.model.factor.Factor" %>
+<%@ page import="ru.devlot.model.Factor" %>
+<%@ page import="ru.devlot.model.Factor.Class" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
