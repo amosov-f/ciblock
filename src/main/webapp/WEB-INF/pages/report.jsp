@@ -60,15 +60,15 @@
             </div>
             <div class="col-lg-6">
                 <h5>Похожие проекты</h5>
-                <p>
+                <ol>
                 <%
                     for (Info info : (List<Info>) request.getAttribute("nearestNeighbours")) {
                 %>
-                        <a href="<%= info.getRef() %>" target="_blank"><%= info.getId() %></a><br>
+                        <li><a href="<%= info.getRef() %>" target="_blank"><%= info.getId() %></a></li>
                 <%
                     }
                 %>
-                </p>
+                </ol>
             </div>
         </div>
 

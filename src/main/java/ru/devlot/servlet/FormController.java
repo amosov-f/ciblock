@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import ru.devlot.db.ClassifierDepot;
 import ru.devlot.db.NearestNeighbourDepot;
 import ru.devlot.model.Spreadsheet;
+import ru.devlot.model.Vector;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +32,9 @@ public class FormController {
 
         model.addAttribute("features", spreadsheet.getFactors(Feature.class));
 
+        Vector example = spreadsheet.iterator().next();
+        model.addAttribute("example", example);
+
         return "form";
     }
 
@@ -43,6 +47,7 @@ public class FormController {
 
         Spreadsheet spreadsheet = classifierDepot.get();
 
+
         model.addAttribute("features", spreadsheet.getFactors(Feature.class));
         model.addAttribute("answers", spreadsheet.getFactors(Answer.class));
 
@@ -53,6 +58,11 @@ public class FormController {
         model.addAttribute("nearestNeighbours", nearestNeighbourDepot.getKNearestNeighbours(features, 3));
 
         return "report";
+    }
+
+    @RequestMapping("/how")
+    public String how() {
+        return "how";
     }
 
 }

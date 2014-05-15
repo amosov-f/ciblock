@@ -7,6 +7,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="static ru.devlot.model.Factor.Feature" %>
+<%@ page import="ru.devlot.model.Vector" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -35,12 +36,14 @@
             <h4>Введите данные по кварталу</h4>
         <%
             List<Feature> features = (List<Feature>) request.getAttribute("features");
+            Vector example = (Vector) request.getAttribute("example");
 
             for (Feature feature : features) {
+                String name = feature.getName();
         %>
                 <div class="input-group">
-                    <span class="input-group-addon"><%= feature.getName() %></span>
-                    <input id="<%= feature.getName() %>" name="feature" type="number" class="form-control">
+                    <span class="input-group-addon"><%= name %></span>
+                    <input id="<%= name %>" name="feature" type="number" class="form-control" placeholder="<%= example.get(name) %>">
                     <span class="input-group-addon"><%= feature.getDimension() %></span>
                 </div>
                 <br>
@@ -48,8 +51,11 @@
             }
         %>
             <div class="form-group">
-                <button class="btn btn-primary" onclick="submit()">Расcчитать!</button>
+                <button class="btn btn-primary col-lg-5" onclick="submit()">Расcчитать!</button>
+                <a href="/how"><button class="btn btn-link col-lg-7">Как это работает?</button></a>
             </div>
+
+
         </div>
         <div id="report" class="col-lg-8  col-md-8 col-sm-8 col-xs-12">
         </div>
