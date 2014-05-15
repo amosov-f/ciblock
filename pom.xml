@@ -98,12 +98,6 @@
             <artifactId>json</artifactId>
             <version>20090211</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.jzy3d</groupId>
-            <artifactId>jzy3d-api</artifactId>
-            <version>0.9.1</version>
-        </dependency>
     </dependencies>
 
 </project>

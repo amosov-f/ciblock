@@ -4,7 +4,9 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <%@ page import="ru.devlot.model.Factor" %>
+<%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="static ru.devlot.model.Factor.Feature" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -32,14 +34,14 @@
         <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
             <h4>Введите данные по кварталу</h4>
         <%
-            Map<Integer, Factor> features = (Map<Integer, Factor>) request.getAttribute("features");
+            List<Feature> features = (List<Feature>) request.getAttribute("features");
 
-            for (int i : features.keySet()) {
+            for (Feature feature : features) {
         %>
                 <div class="input-group">
-                    <span class="input-group-addon"><%= features.get(i).getName() %></span>
-                    <input id="<%= i %>" name="feature" type="number" class="form-control">
-                    <span class="input-group-addon"><%= features.get(i).getDimension() %></span>
+                    <span class="input-group-addon"><%= feature.getName() %></span>
+                    <input id="<%= feature.getName() %>" name="feature" type="number" class="form-control">
+                    <span class="input-group-addon"><%= feature.getDimension() %></span>
                 </div>
                 <br>
         <%

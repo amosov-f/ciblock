@@ -1,32 +1,32 @@
 package ru.devlot.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Vector {
 
     private final String id;
 
-    private final List<String> values = new ArrayList<>();
+    private final Map<String, String> name2value = new HashMap<>();
 
     public Vector(String id) {
         this.id = id;
     }
 
-    public void add(String value) {
-        values.add(value);
+    public void add(String name, String value) {
+        name2value.put(name, value);
     }
 
-    public double getDouble(int i) {
-        return new Double(values.get(i));
+    public double getDouble(String name) {
+        return new Double(name2value.get(name));
     }
 
-    public String get(int i) {
-        return values.get(i);
+    public String get(String name) {
+        return name2value.get(name);
     }
 
-    public boolean contains(int i) {
-        return values.get(i) != null && !values.get(i).isEmpty();
+    public boolean contains(String name) {
+        return name2value.get(name) != null && !name2value.get(name).isEmpty();
     }
 
     public String getId() {
@@ -36,7 +36,7 @@ public class Vector {
     @Override
     public String toString() {
         String s = id + "\t";
-        for (String value : values) {
+        for (String value : name2value.values()) {
             s += value + "\t";
         }
         return s;

@@ -67,11 +67,13 @@ public class SpreadsheetDepot {
             throw new RecentUpdateException(cellFeed.getUpdated());
         }
 
+        List<String> names = new ArrayList<>();
         for (CellEntry cell : cellFeed.getEntries()) {
             String description = cell.getCell().getValue();
 
             Factor factor = Factor.parse(description);
             spreadsheet.addFactor(factor);
+            names.add(factor.getName());
         }
 
         URL listFeedUrl = new URL("https://spreadsheets.google.com/feeds/list/" + key + "/od6/private/full");
@@ -80,16 +82,17 @@ public class SpreadsheetDepot {
             Vector vector = new Vector(row.getTitle().getPlainText());
 
             List<String> tags = new ArrayList<>(row.getCustomElements().getTags());
-            for (String tag : tags.subList(1, tags.size())) {
-                vector.add(row.getCustomElements().getValue(tag));
+            tags = tags.subList(1, tags.size());
+            for (int i = 0; i < tags.size(); ++i) {
+                vector.add(names.get(i), row.getCustomElements().getValue(tags.get(i)));
             }
 
             spreadsheet.add(vector);
         }
 
-        for (int i : spreadsheet.getClasses().keySet()) {
-            for (Vector x : spreadsheet) {
-                spreadsheet.getClasses().get(i).add(x.get(i));
+        for (Vector x : spreadsheet) {
+            for (Factor.Class type : spreadsheet.getFactors(Factor.Class.class)) {
+                type.add(x.get(type.getName()));
             }
         }
 

@@ -3,6 +3,7 @@ package ru.devlot.db;
 import org.springframework.beans.factory.annotation.Required;
 import ru.devlot.db.spreadsheet.DataDepot;
 import ru.devlot.db.spreadsheet.InfoDepot;
+import ru.devlot.model.Info;
 import ru.devlot.model.Spreadsheet;
 import ru.devlot.model.Vector;
 import weka.core.Attribute;
@@ -11,7 +12,12 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.neighboursearch.LinearNNSearch;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static ru.devlot.model.Factor.Feature;
 
 public class NearestNeighbourDepot {
 
@@ -19,7 +25,7 @@ public class NearestNeighbourDepot {
     private InfoDepot infoDepot;
 
 
-    private Map<Integer, Attribute> attributes;
+    private Map<String, Attribute> attributes;
 
     private Spreadsheet data;
     private Spreadsheet info;
@@ -55,21 +61,23 @@ public class NearestNeighbourDepot {
         learnIds = new ArrayList<>();
         learnInstances = new Instances("knn", new ArrayList<>(attributes.values()), data.size());
         for (Vector x : data) {
-            learnIds.add(x.getId());
-            learnInstances.add(toInstance(x));
+            if (info.get(x.getId()).contains("ссылка")) {
+                learnIds.add(x.getId());
+                learnInstances.add(toInstance(x));
+            }
         }
         search = new LinearNNSearch(learnInstances);
     }
 
-    public List<String> getKNearestNeighbours(Map<Integer, Double> x, int k) throws Exception {
+    public List<Info> getKNearestNeighbours(Map<String, Double> x, int k) throws Exception {
         Instance instance = new DenseInstance(attributes.size());
-        for (int i : data.getFeatures().keySet()) {
-            instance.setValue(attributes.get(i), x.get(i));
+        for (Feature feature : data.getFactors(Feature.class)) {
+            instance.setValue(attributes.get(feature.getName()), x.get(feature.getName()));
         }
 
-        List<String> neighbours = new ArrayList<>();
+        List<Info> neighbours = new ArrayList<>();
         for (Instance neighbour : search.kNearestNeighbours(instance, k)) {
-            neighbours.add(getURL(neighbour));
+            neighbours.add(toInfo(neighbour));
         }
 
         return neighbours;
@@ -77,23 +85,23 @@ public class NearestNeighbourDepot {
 
     private Instance toInstance(Vector x) {
         Instance instance = new DenseInstance(attributes.size());
-        for (int i : data.getFeatures().keySet()) {
-            instance.setValue(attributes.get(i), x.getDouble(i));
+        for (Feature feature : data.getFactors(Feature.class)) {
+            instance.setValue(attributes.get(feature.getName()), x.getDouble(feature.getName()));
         }
         return instance;
     }
 
     private synchronized void initAttributes() {
         attributes = new HashMap<>();
-        for (int i : data.getFeatures().keySet()) {
-            attributes.put(i, new Attribute(data.getFeatures().get(i).getName()));
+        for (Feature feature : data.getFactors(Feature.class)) {
+            attributes.put(feature.getName(), new Attribute(feature.getName()));
         }
     }
 
-    public String getURL(Instance instance) {
+    public Info toInfo(Instance instance) {
         for (int i = 0; i < learnInstances.size(); ++i) {
             if (learnInstances.get(i).toString().equals(instance.toString())) {
-                return info.get(learnIds.get(i)).get(info.getFactorIndex("ссылка"));
+                return new Info(learnIds.get(i), info.get(learnIds.get(i)).get("ссылка"));
             }
         }
         return null;

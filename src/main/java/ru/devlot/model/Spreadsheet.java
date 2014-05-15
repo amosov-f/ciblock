@@ -2,26 +2,22 @@ package ru.devlot.model;
 
 import java.util.*;
 
-import static ru.devlot.model.Factor.Answer;
-import static ru.devlot.model.Factor.Feature;
-import static ru.devlot.model.Factor.Class;
-
 public class Spreadsheet implements Iterable<Vector> {
 
-    private final List<Factor> factors = new ArrayList<>();
+    private final Map<String, Factor> name2factor = new HashMap<>();
 
-    private final List<Vector> vectors = new ArrayList<>();
+    private final Map<String, Vector> id2vector = new HashMap<>();
 
     public void addFactor(Factor factor) {
-        factors.add(factor);
+        name2factor.put(factor.getName(), factor);
     }
 
     public void add(Vector x) {
-        vectors.add(x);
+        id2vector.put(x.getId(), x);
     }
 
-    public Factor getFactor(int i) {
-        return factors.get(i);
+    public Factor getFactor(String name) {
+        return name2factor.get(name);
     }
 
     public Vector get(String id) {
@@ -33,87 +29,44 @@ public class Spreadsheet implements Iterable<Vector> {
         return null;
     }
 
-    public Map<Integer, Feature> getFeatures() {
-        Map<Integer, Feature> features = new HashMap<>();
-        for (int i = 0; i < factors.size(); ++i) {
-            if (factors.get(i) instanceof Feature) {
-                features.put(i, (Feature) factors.get(i));
+    public <T extends Factor> List<T> getFactors(java.lang.Class<T> type) {
+        List<T> features = new ArrayList<>();
+        for (Factor factor : name2factor.values()) {
+            if (type.isInstance(factor)) {
+                features.add((T) factor);
             }
         }
         return features;
     }
 
-    public Map<Integer, Answer> getAnswers() {
-        Map<Integer, Factor.Answer> answers = new HashMap<>();
-        for (int i = 0; i < factors.size(); ++i) {
-            if (factors.get(i) instanceof Answer) {
-                answers.put(i, (Answer) factors.get(i));
-            }
-        }
-        return answers;
-    }
-
-    public Map<Integer, Class> getClasses() {
-        Map<Integer, Class> answers = new HashMap<>();
-        for (int i = 0; i < factors.size(); ++i) {
-            if (factors.get(i) instanceof Class) {
-                answers.put(i, (Class) factors.get(i));
-            }
-        }
-        return answers;
-    }
-
     public List<Factor> getFactors() {
-        return factors;
+        return getFactors(Factor.class);
     }
 
     public int size() {
-        return vectors.size();
-    }
-
-    public List<String> getColumn(String name) {
-        int factorIndex = getFactorIndex(name);
-        if (factorIndex == -1) {
-            return null;
-        }
-
-        List<String> values = new ArrayList<>();
-        for (Vector x : this) {
-            values.add(x.get(factorIndex));
-        }
-        return values;
+        return id2vector.size();
     }
 
     public List<Double> getDoubles(String name) {
-        int factorIndex = getFactorIndex(name);
-        if (factorIndex == -1) {
+        if (!name2factor.containsKey(name)) {
             return null;
         }
 
         List<Double> values = new ArrayList<>();
         for (Vector x : this) {
-            values.add(x.getDouble(factorIndex));
+            values.add(x.getDouble(name));
         }
         return values;
-    }
-
-    public int getFactorIndex(String name) {
-        for (int i = 0; i < factors.size(); ++i) {
-            if (factors.get(i).getName().equals(name)) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     @Override
     public String toString() {
         String s = "name\t";
-        for (Factor factor : factors) {
+        for (Factor factor : name2factor.values()) {
             s += factor.toString() + "\t";
         }
         s += "\n";
-        for (Vector x : vectors) {
+        for (Vector x : id2vector.values()) {
             s += x + "\n";
         }
         return s;
@@ -121,7 +74,7 @@ public class Spreadsheet implements Iterable<Vector> {
 
     @Override
     public Iterator<Vector> iterator() {
-        return vectors.iterator();
+        return id2vector.values().iterator();
     }
 
 }

@@ -13,6 +13,9 @@ import ru.devlot.model.Spreadsheet;
 import java.util.HashMap;
 import java.util.Map;
 
+import static ru.devlot.model.Factor.Answer;
+import static ru.devlot.model.Factor.Feature;
+
 @Controller
 public class FormController {
 
@@ -26,24 +29,24 @@ public class FormController {
     public String form(Model model) {
         Spreadsheet spreadsheet = classifierDepot.get();
 
-        model.addAttribute("features", spreadsheet.getFeatures());
+        model.addAttribute("features", spreadsheet.getFactors(Feature.class));
 
         return "form";
     }
 
     @RequestMapping("/submit")
     public String submit(@RequestParam String feature_json, Model model) throws Exception {
-        Map<Integer, Double> features = new HashMap<>();
+        Map<String, Double> features = new HashMap<>();
         for (Map.Entry<String, String> entry : ((Map<String, String>) JSON.parse(feature_json)).entrySet()) {
-            features.put(new Integer(entry.getKey()), new Double(entry.getValue()));
+            features.put(entry.getKey(), new Double(entry.getValue()));
         }
 
         Spreadsheet spreadsheet = classifierDepot.get();
 
-        model.addAttribute("features", spreadsheet.getFeatures());
-        model.addAttribute("answers", spreadsheet.getAnswers());
+        model.addAttribute("features", spreadsheet.getFactors(Feature.class));
+        model.addAttribute("answers", spreadsheet.getFactors(Answer.class));
 
-        Map<Integer, Double> values = new HashMap<>(features);
+        Map<String, Double> values = new HashMap<>(features);
         values.putAll(classifierDepot.classify(features));
         model.addAttribute("values", values);
 

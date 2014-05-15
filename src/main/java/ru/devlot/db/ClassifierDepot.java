@@ -19,15 +19,17 @@ import weka.core.Instances;
 
 import java.util.*;
 
+import static ru.devlot.model.Factor.Feature;
+
 
 public class ClassifierDepot {
 
     private DataDepot dataDepot;
 
-    private Map<Integer, Classifier> classifiers;
+    private Map<String, Classifier> classifiers;
 
     private Spreadsheet data;
-    private List<Attribute> attributes;
+    private Map<String, Attribute> attributes;
 
     private static final Map<
             java.lang.Class<? extends Answer>,
@@ -44,13 +46,16 @@ public class ClassifierDepot {
                 data = dataDepot.get();
 
                 try {
-                    attributes = getAttributes();
+                    initAttributes();
                     classifiers = train();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                System.out.println(classifiers);
-                System.out.println();
+
+                if (classifiers != null) {
+                    System.out.println(classifiers.values());
+                }
+
                 try {
                     Thread.sleep(10000);
                 } catch (InterruptedException e) {
@@ -60,47 +65,41 @@ public class ClassifierDepot {
         }).start();
     }
 
-    public Map<Integer, Double> classify(Map<Integer, Double> features) throws Exception {
-        Instance instance = new DenseInstance(features.size());
-        for (int i : features.keySet()) {
-            instance.setValue(attributes.get(i), features.get(i));
+    public Map<String, Double> classify(Map<String, Double> features) throws Exception {
+        Instance instance = new DenseInstance(attributes.size());
+        for (String name : features.keySet()) {
+            instance.setValue(attributes.get(name), features.get(name));
         }
 
-        Instances test = new Instances("test", new ArrayList<>(attributes), 1);
-        test.add(instance);
-
-        Map<Integer, Double> answers = new HashMap<>();
-        for (int answerIndex : classifiers.keySet()) {
-            answers.put(answerIndex, classifiers.get(answerIndex).classifyInstance(instance));
+        Map<String, Double> answers = new HashMap<>();
+        for (String name : classifiers.keySet()) {
+            answers.put(name, classifiers.get(name).classifyInstance(instance));
         }
 
         return answers;
     }
 
-    private Map<Integer, Classifier> train() throws Exception {
-        Map<Integer, Classifier> classifiers = new HashMap<>();
-        for (int i : data.getAnswers().keySet()) {
-            Classifier classifier = train(i);
-            classifiers.put(i, classifier);
-            System.out.println(i + ": " + classifier);
-            System.out.println(classifiers);
+    private Map<String, Classifier> train() throws Exception {
+        Map<String, Classifier> classifiers = new HashMap<>();
+        for (Answer answer : data.getFactors(Answer.class)) {
+            Classifier classifier = train(answer);
+            classifiers.put(answer.getName(), classifier);
         }
 
         return classifiers;
     }
 
 
-    private Classifier train(int answerIndex) throws Exception {
-        Answer answer = data.getAnswers().get(answerIndex);
+    private Classifier train(Answer answer) throws Exception {
+        Instances learn = new Instances(answer.getName(), new ArrayList<>(attributes.values()), data.size());
 
-        Instances learn = new Instances(answer.getName(), new ArrayList<>(attributes), data.size());
         for (Vector x : data) {
-            Instance instance = toInstance(x, answerIndex);
+            Instance instance = toInstance(x, answer.getName());
             if (instance != null) {
                 learn.add(instance);
             }
         }
-        learn.setClass(attributes.get(answerIndex));
+        learn.setClass(attributes.get(answer.getName()));
 
         System.out.println(learn);
 
@@ -114,29 +113,32 @@ public class ClassifierDepot {
         return classifier;
     }
 
-    private List<Attribute> getAttributes() {
-        List<Attribute> attributes = new ArrayList<>();
+    private synchronized void initAttributes() {
+        attributes = new HashMap<>();
         for (Factor factor : data.getFactors()) {
-            attributes.add(new Attribute(factor.getName()));
+            attributes.put(factor.getName(), new Attribute(factor.getName()));
+            //System.out.println(attributes.get(factor.getName()).index());
         }
-        return attributes;
+        for (Attribute attribute : attributes.values()) {
+            System.out.println(attribute + " " + attribute.index());
+        }
     }
 
-    private Instance toInstance(Vector x, int answerIndex) {
-        if (!x.contains(answerIndex)) {
+    private Instance toInstance(Vector x, String answerName) {
+        if (!x.contains(answerName)) {
             return null;
         }
 
         Instance instance = new DenseInstance(attributes.size());
-        for (int i : data.getFeatures().keySet()) {
-            instance.setValue(attributes.get(i), x.getDouble(i));
+        for (Feature feature : data.getFactors(Feature.class)) {
+            instance.setValue(attributes.get(feature.getName()), x.getDouble(feature.getName()));
 
         }
 
-        if (data.getFactor(answerIndex) instanceof Class) {
-            instance.setValue(attributes.get(answerIndex), x.get(answerIndex));
+        if (data.getFactor(answerName) instanceof Class) {
+            instance.setValue(attributes.get(answerName), x.get(answerName));
         } else {
-            instance.setValue(attributes.get(answerIndex), x.getDouble(answerIndex));
+            instance.setValue(attributes.get(answerName), x.getDouble(answerName));
         }
 
         return instance;
