@@ -3,11 +3,9 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<%@ page import="ru.devlot.model.Factor" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="static ru.devlot.model.Factor.Feature" %>
 <%@ page import="ru.devlot.model.Vector" %>
+<%@ page import="java.util.List" %>
+<%@ page import="static ru.devlot.model.Factor.Feature" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -41,22 +39,25 @@
             for (Feature feature : features) {
                 String name = feature.getName();
         %>
-                <div class="input-group">
+                <div class="form-group input-group">
                     <span class="input-group-addon"><%= name %></span>
                     <input id="<%= name %>" name="feature" type="number" class="form-control" placeholder="<%= example.get(name) %>">
                     <span class="input-group-addon"><%= feature.getDimension() %></span>
                 </div>
-                <br>
         <%
             }
         %>
-            <div class="form-group">
-                <button class="btn btn-primary col-lg-5" onclick="submit()">Расcчитать!</button>
-                <a href="/how"><button class="btn btn-link col-lg-7">Как это работает?</button></a>
+            <div class="form-group btn-group-justified">
+                <a class="btn btn-primary" onclick="submit()">Расcчитать!</a>
+                <a class="btn btn-link" href="/how">Как это работает?</a>
             </div>
 
-
+            <div class="form-group" align="center">
+                <script type="text/javascript"></script>
+                <div class="pluso" data-background="#ebebeb" data-options="medium,square,line,horizontal,nocounter,theme=04" data-services="print,email,vkontakte,facebook,twitter" data-user="1725861257"></div>
+            </div>
         </div>
+
         <div id="report" class="col-lg-8  col-md-8 col-sm-8 col-xs-12">
         </div>
     </div>
@@ -78,6 +79,26 @@
                 }
             });
         }
+
+        (function() {
+            if (window.pluso) {
+                if (typeof window.pluso.start == "function") {
+                    return;
+                }
+            }
+            if (window.ifpluso == undefined) {
+                window.ifpluso = 1;
+                var d = document;
+                var s = d.createElement('script');
+                var g = 'getElementsByTagName';
+                s.type = 'text/javascript';
+                s.charset='UTF-8';
+                s.async = true;
+                s.src = ('https:' == window.location.protocol ? 'https' : 'http')  + '://share.pluso.ru/pluso-like.js';
+                var h = d[g]('body')[0];
+                h.appendChild(s);
+            }
+        })();
 
     </script>
 </body>

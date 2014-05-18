@@ -2,12 +2,12 @@ package ru.devlot.db;
 
 import org.springframework.beans.factory.annotation.Required;
 import ru.devlot.db.spreadsheet.DataDepot;
-import ru.devlot.model.Spreadsheet;
-import ru.devlot.model.Vector;
+import ru.devlot.model.Factor;
 import ru.devlot.model.Factor.Answer;
 import ru.devlot.model.Factor.Class;
-import ru.devlot.model.Factor;
 import ru.devlot.model.Factor.Regression;
+import ru.devlot.model.Spreadsheet;
+import ru.devlot.model.Vector;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LinearRegression;
@@ -17,7 +17,10 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 import static ru.devlot.model.Factor.Feature;
 
@@ -80,6 +83,8 @@ public class ClassifierDepot {
     }
 
     private Map<String, Classifier> train() throws Exception {
+        System.out.println("Train!");
+
         Map<String, Classifier> classifiers = new HashMap<>();
         for (Answer answer : data.getFactors(Answer.class)) {
             Classifier classifier = train(answer);
@@ -91,6 +96,8 @@ public class ClassifierDepot {
 
 
     private Classifier train(Answer answer) throws Exception {
+        System.out.println("Train " + answer + "!");
+
         Instances learn = new Instances(answer.getName(), new ArrayList<>(attributes.values()), data.size());
 
         for (Vector x : data) {
@@ -100,8 +107,6 @@ public class ClassifierDepot {
             }
         }
         learn.setClass(attributes.get(answer.getName()));
-
-        System.out.println(learn);
 
         Classifier classifier = type2classifier.get(answer.getClass()).getConstructor().newInstance();
         classifier.buildClassifier(learn);
@@ -117,10 +122,6 @@ public class ClassifierDepot {
         attributes = new HashMap<>();
         for (Factor factor : data.getFactors()) {
             attributes.put(factor.getName(), new Attribute(factor.getName()));
-            //System.out.println(attributes.get(factor.getName()).index());
-        }
-        for (Attribute attribute : attributes.values()) {
-            System.out.println(attribute + " " + attribute.index());
         }
     }
 

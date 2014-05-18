@@ -15,19 +15,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>jzy3d-snapshots</id>
-            <name>Jzy3d Snapshots</name>
-            <url>http://www.jzy3d.org/maven/snapshots</url>
-        </repository>
-        <repository>
-            <id>jzy3d-releases</id>
-            <name>Jzy3d Snapshots</name>
-            <url>http://www.jzy3d.org/maven/releases</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
