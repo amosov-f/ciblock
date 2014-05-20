@@ -9,7 +9,6 @@ public class LotDeveloperEngine {
     public static String username;
     public static String password;
 
-
     public static void main(String[] args) throws Exception {
         if (args.length < 2) {
             throw new Exception("No username or password");

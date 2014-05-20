@@ -1,7 +1,6 @@
 package ru.devlot.db;
 
 import org.springframework.beans.factory.annotation.Required;
-import ru.devlot.db.spreadsheet.DataDepot;
 import ru.devlot.model.Factor;
 import ru.devlot.model.Factor.Answer;
 import ru.devlot.model.Factor.Class;
@@ -22,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import static ru.devlot.db.SpreadsheetDepot.DataDepot;
 import static ru.devlot.model.Factor.Feature;
 
 

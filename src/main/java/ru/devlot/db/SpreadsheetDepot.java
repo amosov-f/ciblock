@@ -1,4 +1,4 @@
-package ru.devlot.db.spreadsheet;
+package ru.devlot.db;
 
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.DateTime;
@@ -97,6 +97,22 @@ public class SpreadsheetDepot {
         }
 
         return spreadsheet;
+    }
+
+    public static class DataDepot extends SpreadsheetDepot {
+
+        public DataDepot() {
+            super("tC-ZyoR2ayny8PP0JKBUDLw");
+        }
+
+    }
+
+    public static class InfoDepot extends SpreadsheetDepot {
+
+        public InfoDepot() {
+            super("0AsHmCykL-ex2dEVfMmpSUGZxVTFvSllLcHBxSWdvZnc");
+        }
+
     }
 
     public class RecentUpdateException extends Exception {

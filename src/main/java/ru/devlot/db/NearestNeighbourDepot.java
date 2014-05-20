@@ -1,8 +1,6 @@
 package ru.devlot.db;
 
 import org.springframework.beans.factory.annotation.Required;
-import ru.devlot.db.spreadsheet.DataDepot;
-import ru.devlot.db.spreadsheet.InfoDepot;
 import ru.devlot.model.Info;
 import ru.devlot.model.Spreadsheet;
 import ru.devlot.model.Vector;
@@ -17,13 +15,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static ru.devlot.db.SpreadsheetDepot.DataDepot;
+import static ru.devlot.db.SpreadsheetDepot.InfoDepot;
 import static ru.devlot.model.Factor.Feature;
 
 public class NearestNeighbourDepot {
 
     private DataDepot dataDepot;
     private InfoDepot infoDepot;
-
 
     private Map<String, Attribute> attributes;
 
