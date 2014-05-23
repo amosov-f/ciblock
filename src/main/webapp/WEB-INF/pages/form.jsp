@@ -70,6 +70,22 @@
                 features[$(this).attr('id')] = $(this).val();
             });
 
+            for (var id in features) {
+                var val = parseFloat(features[id]);
+                if (isNaN(val)) {
+                    alert(capitaliseFirstLetter(id) + ' должен(а) быть числом!');
+                    return;
+                }
+                if (val < 0) {
+                    alert(capitaliseFirstLetter(id) + ' должен(а) быть положительным числом!');
+                    return;
+                }
+                if (val > 1e9) {
+                    alert(capitaliseFirstLetter(id) + ' не должен(а) быть очень большим числом!');
+                    return;
+                }
+            }
+
             console.log(JSON.stringify(features));
             $.ajax({
                 url: '/submit',
@@ -99,6 +115,10 @@
                 h.appendChild(s);
             }
         })();
+
+        function capitaliseFirstLetter(s) {
+            return s.charAt(0).toUpperCase() + s.slice(1);
+        }
 
     </script>
 </body>
