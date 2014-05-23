@@ -9,17 +9,14 @@ import ru.devlot.model.Spreadsheet;
 import ru.devlot.model.Vector;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.functions.LinearRegression;
+import weka.classifiers.functions.MultilayerPerceptron;
 import weka.classifiers.functions.SMO;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 import static ru.devlot.db.SpreadsheetDepot.DataDepot;
 import static ru.devlot.model.Factor.Feature;
@@ -39,7 +36,7 @@ public class ClassifierDepot {
             java.lang.Class<? extends Classifier>
     > type2classifier = new HashMap<>();
     static {
-        type2classifier.put(Regression.class, LinearRegression.class);
+        type2classifier.put(Regression.class, MultilayerPerceptron.class);
         type2classifier.put(Class.class, SMO.class);
     }
 
@@ -69,7 +66,11 @@ public class ClassifierDepot {
     }
 
     public Map<String, Double> classify(Map<String, Double> features) throws Exception {
-        Instance instance = new DenseInstance(attributes.size());
+        for (Attribute attribute : attributes.values()) {
+            System.out.println(attribute + " " + attribute.index());
+        }
+
+        Instance instance = new DenseInstance(getFeatures().size() + 1);
         for (String name : features.keySet()) {
             instance.setValue(attributes.get(name), features.get(name));
         }
@@ -98,7 +99,7 @@ public class ClassifierDepot {
     private Classifier train(Answer answer) throws Exception {
         System.out.println("Train " + answer + "!");
 
-        Instances learn = new Instances(answer.getName(), new ArrayList<>(attributes.values()), data.size());
+        Instances learn = new Instances(answer.getName(), getAttributes(answer.getName()), data.size());
 
         for (Vector x : data) {
             Instance instance = toInstance(x, answer.getName());
@@ -125,15 +126,28 @@ public class ClassifierDepot {
         }
     }
 
+    public ArrayList<Attribute> getAttributes(String answerName) {
+        ArrayList<Attribute> attributes = new ArrayList<>(getFeatures());
+        attributes.add(this.attributes.get(answerName));
+        return attributes;
+    }
+
+    public List<Attribute> getFeatures() {
+        ArrayList<Attribute> attributes = new ArrayList<>();
+        for (Feature feature : data.getFactors(Feature.class)) {
+            attributes.add(this.attributes.get(feature.getName()));
+        }
+        return attributes;
+    }
+
     private Instance toInstance(Vector x, String answerName) {
         if (!x.contains(answerName)) {
             return null;
         }
 
-        Instance instance = new DenseInstance(attributes.size());
+        Instance instance = new DenseInstance(getAttributes(answerName).size());
         for (Feature feature : data.getFactors(Feature.class)) {
             instance.setValue(attributes.get(feature.getName()), x.getDouble(feature.getName()));
-
         }
 
         if (data.getFactor(answerName) instanceof Class) {
