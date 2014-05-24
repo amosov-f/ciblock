@@ -1,9 +1,14 @@
 package ru.devlot.model;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class Vector {
+
+    private static NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
 
     private final String id;
 
@@ -18,7 +23,11 @@ public class Vector {
     }
 
     public double getDouble(String name) {
-        return new Double(name2value.get(name));
+        try {
+            return format.parse(name2value.get(name)).doubleValue();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String get(String name) {
