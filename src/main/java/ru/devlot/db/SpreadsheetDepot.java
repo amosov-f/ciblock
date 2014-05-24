@@ -17,14 +17,23 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ru.devlot.LotDeveloperEngine.SERVER_NAME;
+import static ru.devlot.LotDeveloperEngine.SLEEP_TIME;
+
 public class SpreadsheetDepot {
 
     private Spreadsheet spreadsheet;
 
     private final String key;
 
-    private static final long SLEEP_TIME = 60000;
-    private static final long RECENT_TIME = 60000;
+    private static final long RECENT_TIME;
+    static {
+        if (System.getProperty("user.name").equals(SERVER_NAME)) {
+            RECENT_TIME = 60 * 60 * 1000;
+        } else {
+            RECENT_TIME = 10 * 1000;
+        }
+    }
 
     public SpreadsheetDepot(String key) {
         this.key = key;

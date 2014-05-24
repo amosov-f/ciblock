@@ -9,6 +9,17 @@ public class LotDeveloperEngine {
     public static String username;
     public static String password;
 
+    public static final String SERVER_NAME = "ciblock";
+
+    public static final long SLEEP_TIME;
+    static {
+        if (System.getProperty("user.name").equals(SERVER_NAME)) {
+            SLEEP_TIME = 60 * 60 * 1000;
+        } else {
+            SLEEP_TIME = 10 * 1000;
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         if (args.length < 2) {
             throw new Exception("No username or password");

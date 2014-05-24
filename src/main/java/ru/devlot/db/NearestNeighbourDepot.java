@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static ru.devlot.LotDeveloperEngine.SLEEP_TIME;
 import static ru.devlot.db.SpreadsheetDepot.DataDepot;
 import static ru.devlot.db.SpreadsheetDepot.InfoDepot;
 import static ru.devlot.model.Factor.Feature;
@@ -48,7 +49,7 @@ public class NearestNeighbourDepot {
                 }
 
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(SLEEP_TIME);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
