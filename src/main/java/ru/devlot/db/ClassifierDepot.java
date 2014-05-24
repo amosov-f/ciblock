@@ -9,7 +9,7 @@ import ru.devlot.model.Spreadsheet;
 import ru.devlot.model.Vector;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.functions.MultilayerPerceptron;
+import weka.classifiers.functions.LinearRegression;
 import weka.classifiers.functions.SMO;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -36,7 +36,7 @@ public class ClassifierDepot {
             java.lang.Class<? extends Classifier>
     > type2classifier = new HashMap<>();
     static {
-        type2classifier.put(Regression.class, MultilayerPerceptron.class);
+        type2classifier.put(Regression.class, LinearRegression.class);
         type2classifier.put(Class.class, SMO.class);
     }
 

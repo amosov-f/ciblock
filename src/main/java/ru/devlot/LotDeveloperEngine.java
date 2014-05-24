@@ -20,7 +20,7 @@ public class LotDeveloperEngine {
         Server server = new Server();
 
         ServerConnector connector = new ServerConnector(server);
-        connector.setPort(8082);
+        connector.setPort(8080);
 
         server.addConnector(connector);
 
