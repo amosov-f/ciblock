@@ -9,8 +9,8 @@ import ru.devlot.model.Spreadsheet;
 import ru.devlot.model.Vector;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.functions.LinearRegression;
 import weka.classifiers.functions.SMO;
+import weka.classifiers.functions.SMOreg;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -36,24 +36,27 @@ public class ClassifierDepot {
             java.lang.Class<? extends Classifier>
     > type2classifier = new HashMap<>();
     static {
-        type2classifier.put(Regression.class, LinearRegression.class);
+        type2classifier.put(Regression.class, SMOreg.class);
         type2classifier.put(Class.class, SMO.class);
     }
 
     public void init() {
         new Thread(() -> {
             while (!Thread.interrupted()) {
-                data = dataDepot.get();
 
-                try {
-                    initAttributes();
-                    classifiers = train();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                synchronized (ClassifierDepot.this) {
+                    data = dataDepot.get();
 
-                if (classifiers != null) {
-                    System.out.println(classifiers.values());
+                    try {
+                        initAttributes();
+                        train();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    if (classifiers != null) {
+                        System.out.println(classifiers.values());
+                    }
                 }
 
                 try {
@@ -66,10 +69,6 @@ public class ClassifierDepot {
     }
 
     public Map<String, Double> classify(Map<String, Double> features) throws Exception {
-        for (Attribute attribute : attributes.values()) {
-            System.out.println(attribute + " " + attribute.index());
-        }
-
         Instance instance = new DenseInstance(getFeatures().size() + 1);
         for (String name : features.keySet()) {
             instance.setValue(attributes.get(name), features.get(name));
@@ -83,21 +82,19 @@ public class ClassifierDepot {
         return answers;
     }
 
-    private Map<String, Classifier> train() throws Exception {
+    private void train() throws Exception {
         System.out.println("Train!");
 
-        Map<String, Classifier> classifiers = new HashMap<>();
+        classifiers = new HashMap<>();
         for (Answer answer : data.getFactors(Answer.class)) {
             Classifier classifier = train(answer);
             classifiers.put(answer.getName(), classifier);
         }
-
-        return classifiers;
     }
 
 
     private Classifier train(Answer answer) throws Exception {
-        System.out.println("Train " + answer + "!");
+        System.out.println(answer);
 
         Instances learn = new Instances(answer.getName(), getAttributes(answer.getName()), data.size());
 
@@ -113,7 +110,7 @@ public class ClassifierDepot {
         classifier.buildClassifier(learn);
 
         Evaluation evaluation = new Evaluation(learn);
-        evaluation.crossValidateModel(classifier, learn, 3, new Random());
+        evaluation.crossValidateModel(classifier, learn, 5, new Random());
         System.out.println(evaluation.toSummaryString());
 
         return classifier;

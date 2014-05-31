@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class Vector {
 
-    private static NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
+    private static final NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
 
     private final String id;
 
@@ -24,8 +24,11 @@ public class Vector {
 
     public double getDouble(String name) {
         try {
-            return format.parse(name2value.get(name)).doubleValue();
-        } catch (ParseException e) {
+            synchronized (format) {
+                return format.parse(name2value.get(name)).doubleValue();
+            }
+        } catch (ParseException | NumberFormatException e) {
+            System.out.println(name + " " + name2value.get(name) + " parse error!");
             throw new RuntimeException(e);
         }
     }

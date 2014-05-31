@@ -2,10 +2,7 @@ package ru.devlot.db;
 
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.DateTime;
-import com.google.gdata.data.spreadsheet.CellEntry;
-import com.google.gdata.data.spreadsheet.CellFeed;
-import com.google.gdata.data.spreadsheet.ListEntry;
-import com.google.gdata.data.spreadsheet.ListFeed;
+import com.google.gdata.data.spreadsheet.*;
 import com.google.gdata.util.ServiceException;
 import ru.devlot.LotDeveloperEngine;
 import ru.devlot.model.Spreadsheet;
@@ -24,7 +21,9 @@ public class SpreadsheetDepot {
 
     private Spreadsheet spreadsheet;
 
-    private final String key;
+    private static final String KEY = "tC-ZyoR2ayny8PP0JKBUDLw";
+
+    private final String worksheetId;
 
     private static final long RECENT_TIME;
     static {
@@ -35,20 +34,23 @@ public class SpreadsheetDepot {
         }
     }
 
-    public SpreadsheetDepot(String key) {
-        this.key = key;
+    public SpreadsheetDepot(String worksheetId) {
+        this.worksheetId = worksheetId;
 
         new Thread(() -> {
             while (!Thread.interrupted()) {
-                try {
-                    this.spreadsheet = upload();
-                } catch (RecentUpdateException e) {
-                    e.printStackTrace(System.out);
-                } catch (ServiceException | IOException e) {
-                    e.printStackTrace();
-                }
 
-                System.out.println(this.spreadsheet);
+                synchronized (SpreadsheetDepot.this) {
+                    try {
+                        upload();
+                    } catch (RecentUpdateException e) {
+                        e.printStackTrace(System.out);
+                    } catch (ServiceException | IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    System.out.println(this.spreadsheet);
+                }
 
                 try {
                     Thread.sleep(SLEEP_TIME);
@@ -63,13 +65,14 @@ public class SpreadsheetDepot {
         return spreadsheet;
     }
 
-    public Spreadsheet upload() throws ServiceException, IOException, RecentUpdateException {
+    public synchronized void upload() throws ServiceException, IOException, RecentUpdateException {
+        spreadsheet = new Spreadsheet();
+
         SpreadsheetService service = new SpreadsheetService("devlot-1.0.0");
         service.setUserCredentials(LotDeveloperEngine.username, LotDeveloperEngine.password);
         service.setProtocolVersion(SpreadsheetService.Versions.V3);
 
-        Spreadsheet spreadsheet = new Spreadsheet();
-        URL cellFeedUrl = new URL("https://spreadsheets.google.com/feeds/cells/" + key + "/od6/private/full?max-row=1&min-col=2");
+        URL cellFeedUrl = new URL("https://spreadsheets.google.com/feeds/cells/" + KEY + "/" + worksheetId + "/private/full?max-row=1&min-col=2");
         CellFeed cellFeed = service.getFeed(cellFeedUrl, CellFeed.class);
 
         if (DateTime.now().getValue() - cellFeed.getUpdated().getValue() < RECENT_TIME) {
@@ -85,7 +88,8 @@ public class SpreadsheetDepot {
             names.add(factor.getName());
         }
 
-        URL listFeedUrl = new URL("https://spreadsheets.google.com/feeds/list/" + key + "/od6/private/full");
+        URL listFeedUrl = new URL("https://spreadsheets.google.com/feeds/list/" + KEY + "/" + worksheetId + "/private/full");
+
         ListFeed listFeed = service.getFeed(listFeedUrl, ListFeed.class);
         for (ListEntry row : listFeed.getEntries()) {
             Vector vector = new Vector(row.getTitle().getPlainText());
@@ -104,14 +108,12 @@ public class SpreadsheetDepot {
                 type.add(x.get(type.getName()));
             }
         }
-
-        return spreadsheet;
     }
 
     public static class DataDepot extends SpreadsheetDepot {
 
         public DataDepot() {
-            super("tC-ZyoR2ayny8PP0JKBUDLw");
+            super("od6");
         }
 
     }
@@ -119,7 +121,7 @@ public class SpreadsheetDepot {
     public static class InfoDepot extends SpreadsheetDepot {
 
         public InfoDepot() {
-            super("0AsHmCykL-ex2dEVfMmpSUGZxVTFvSllLcHBxSWdvZnc");
+            super("od4");
         }
 
     }

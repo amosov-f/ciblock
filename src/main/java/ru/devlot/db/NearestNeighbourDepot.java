@@ -38,14 +38,17 @@ public class NearestNeighbourDepot {
     public void init() {
         new Thread(() -> {
             while (!Thread.interrupted()) {
-                data = dataDepot.get();
-                info = infoDepot.get();
 
-                try {
-                    initAttributes();
-                    train();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                synchronized (NearestNeighbourDepot.this) {
+                    data = dataDepot.get();
+                    info = infoDepot.get();
+
+                    try {
+                        initAttributes();
+                        train();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 try {
