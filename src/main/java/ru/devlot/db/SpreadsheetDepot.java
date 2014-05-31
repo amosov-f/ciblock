@@ -43,7 +43,7 @@ public class SpreadsheetDepot {
             while (!Thread.interrupted()) {
                 synchronized (SpreadsheetDepot.this) {
                     try {
-                        upload();
+                        spreadsheet = upload();
                     } catch (RecentUpdateException e) {
                         e.printStackTrace(System.out);
                     } catch (ServiceException | IOException e) {
@@ -65,8 +65,8 @@ public class SpreadsheetDepot {
         return spreadsheet;
     }
 
-    private void upload() throws ServiceException, IOException, RecentUpdateException {
-        spreadsheet = new Spreadsheet();
+    private Spreadsheet upload() throws ServiceException, IOException, RecentUpdateException {
+        Spreadsheet spreadsheet = new Spreadsheet();
 
         SpreadsheetService service = new SpreadsheetService("devlot-1.0.0");
         service.setUserCredentials(LotDeveloperEngine.username, LotDeveloperEngine.password);
@@ -108,6 +108,8 @@ public class SpreadsheetDepot {
                 type.add(x.get(type.getName()));
             }
         }
+
+        return spreadsheet;
     }
 
     public static class DataDepot extends SpreadsheetDepot {
