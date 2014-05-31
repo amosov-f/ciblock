@@ -60,7 +60,7 @@ public class NearestNeighbourDepot {
         }).start();
     }
 
-    private synchronized void train() throws Exception {
+    private void train() throws Exception {
         learnIds = new ArrayList<>();
         learnInstances = new Instances("knn", new ArrayList<>(attributes.values()), data.size());
         for (Vector x : data) {
@@ -72,7 +72,7 @@ public class NearestNeighbourDepot {
         search = new LinearNNSearch(learnInstances);
     }
 
-    public List<Info> getKNearestNeighbours(Map<String, Double> x, int k) throws Exception {
+    public synchronized List<Info> getKNearestNeighbours(Map<String, Double> x, int k) throws Exception {
         Instance instance = new DenseInstance(attributes.size());
         for (Feature feature : data.getFactors(Feature.class)) {
             instance.setValue(attributes.get(feature.getName()), x.get(feature.getName()));
@@ -94,14 +94,14 @@ public class NearestNeighbourDepot {
         return instance;
     }
 
-    private synchronized void initAttributes() {
+    private void initAttributes() {
         attributes = new HashMap<>();
         for (Feature feature : data.getFactors(Feature.class)) {
             attributes.put(feature.getName(), new Attribute(feature.getName()));
         }
     }
 
-    public Info toInfo(Instance instance) {
+    private Info toInfo(Instance instance) {
         for (int i = 0; i < learnInstances.size(); ++i) {
             if (learnInstances.get(i).toString().equals(instance.toString())) {
                 return new Info(learnIds.get(i), info.get(learnIds.get(i)).get("ссылка"));

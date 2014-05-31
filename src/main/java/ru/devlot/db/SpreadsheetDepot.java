@@ -2,12 +2,15 @@ package ru.devlot.db;
 
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
 import com.google.gdata.data.DateTime;
-import com.google.gdata.data.spreadsheet.*;
+import com.google.gdata.data.spreadsheet.CellEntry;
+import com.google.gdata.data.spreadsheet.CellFeed;
+import com.google.gdata.data.spreadsheet.ListEntry;
+import com.google.gdata.data.spreadsheet.ListFeed;
 import com.google.gdata.util.ServiceException;
 import ru.devlot.LotDeveloperEngine;
+import ru.devlot.model.Factor;
 import ru.devlot.model.Spreadsheet;
 import ru.devlot.model.Vector;
-import ru.devlot.model.Factor;
 
 import java.io.IOException;
 import java.net.URL;
@@ -36,10 +39,8 @@ public class SpreadsheetDepot {
 
     public SpreadsheetDepot(String worksheetId) {
         this.worksheetId = worksheetId;
-
         new Thread(() -> {
             while (!Thread.interrupted()) {
-
                 synchronized (SpreadsheetDepot.this) {
                     try {
                         upload();
@@ -49,9 +50,8 @@ public class SpreadsheetDepot {
                         e.printStackTrace();
                     }
 
-                    System.out.println(this.spreadsheet);
+                    System.out.println(spreadsheet);
                 }
-
                 try {
                     Thread.sleep(SLEEP_TIME);
                 } catch (InterruptedException e) {
@@ -61,11 +61,11 @@ public class SpreadsheetDepot {
         }).start();
     }
 
-    public Spreadsheet get() {
+    public synchronized Spreadsheet get() {
         return spreadsheet;
     }
 
-    public synchronized void upload() throws ServiceException, IOException, RecentUpdateException {
+    private void upload() throws ServiceException, IOException, RecentUpdateException {
         spreadsheet = new Spreadsheet();
 
         SpreadsheetService service = new SpreadsheetService("devlot-1.0.0");

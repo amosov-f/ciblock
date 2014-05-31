@@ -43,7 +43,6 @@ public class ClassifierDepot {
     public void init() {
         new Thread(() -> {
             while (!Thread.interrupted()) {
-
                 synchronized (ClassifierDepot.this) {
                     data = dataDepot.get();
 
@@ -55,7 +54,7 @@ public class ClassifierDepot {
                     }
 
                     if (classifiers != null) {
-                        System.out.println(classifiers.values());
+                        System.out.println("classifiers: " + classifiers.values());
                     }
                 }
 
@@ -68,7 +67,7 @@ public class ClassifierDepot {
         }).start();
     }
 
-    public Map<String, Double> classify(Map<String, Double> features) throws Exception {
+    public synchronized Map<String, Double> classify(Map<String, Double> features) throws Exception {
         Instance instance = new DenseInstance(getFeatures().size() + 1);
         for (String name : features.keySet()) {
             instance.setValue(attributes.get(name), features.get(name));
@@ -87,13 +86,12 @@ public class ClassifierDepot {
 
         classifiers = new HashMap<>();
         for (Answer answer : data.getFactors(Answer.class)) {
-            Classifier classifier = train(answer);
-            classifiers.put(answer.getName(), classifier);
+            train(answer);
         }
     }
 
 
-    private Classifier train(Answer answer) throws Exception {
+    private void train(Answer answer) throws Exception {
         System.out.println(answer);
 
         Instances learn = new Instances(answer.getName(), getAttributes(answer.getName()), data.size());
@@ -113,23 +111,23 @@ public class ClassifierDepot {
         evaluation.crossValidateModel(classifier, learn, 5, new Random());
         System.out.println(evaluation.toSummaryString());
 
-        return classifier;
+        classifiers.put(answer.getName(), classifier);
     }
 
-    private synchronized void initAttributes() {
+    private void initAttributes() {
         attributes = new HashMap<>();
         for (Factor factor : data.getFactors()) {
             attributes.put(factor.getName(), new Attribute(factor.getName()));
         }
     }
 
-    public ArrayList<Attribute> getAttributes(String answerName) {
+    private ArrayList<Attribute> getAttributes(String answerName) {
         ArrayList<Attribute> attributes = new ArrayList<>(getFeatures());
         attributes.add(this.attributes.get(answerName));
         return attributes;
     }
 
-    public List<Attribute> getFeatures() {
+    private List<Attribute> getFeatures() {
         ArrayList<Attribute> attributes = new ArrayList<>();
         for (Feature feature : data.getFactors(Feature.class)) {
             attributes.add(this.attributes.get(feature.getName()));
@@ -156,7 +154,7 @@ public class ClassifierDepot {
         return instance;
     }
 
-    public Spreadsheet get() {
+    public synchronized Spreadsheet get() {
         return data;
     }
 
