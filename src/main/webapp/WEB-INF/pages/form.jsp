@@ -19,6 +19,7 @@
     <title>Lot Developer</title>
 
     <link href="/resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../resources/utility/css/styles.css" rel="stylesheet">
 
     <script type="text/javascript" src="/resources/jquery/jquery.min.js"></script>
     <script src="/resources/bootstrap/js/bootstrap.min.js"></script>
@@ -26,6 +27,17 @@
 </head>
 
 <body>
+
+<div class="blog-masthead">
+    <div class="container">
+        <nav class="blog-nav">
+            <a class="blog-nav-item active" href="/form">Главная</a>
+            <a class="blog-nav-item" href="/how">Как это работает?</a>
+            <a class="blog-nav-item" href="/about">О нас</a>
+        </nav>
+    </div>
+</div>
+
     <div class="container">
         <div class="page-header" align="center">
             <h1>Рассчет предпроекта</h1>
@@ -49,7 +61,6 @@
         %>
             <div class="form-group btn-group-justified">
                 <a class="btn btn-primary" onclick="submit()">Расcчитать!</a>
-                <a class="btn btn-link" href="/how">Как это работает?</a>
             </div>
 
             <div class="form-group" align="center">
