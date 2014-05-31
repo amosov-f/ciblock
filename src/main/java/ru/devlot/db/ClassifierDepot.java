@@ -18,9 +18,9 @@ import weka.core.Instances;
 
 import java.util.*;
 
+import static ru.devlot.LotDeveloperEngine.SLEEP_TIME;
 import static ru.devlot.db.SpreadsheetDepot.DataDepot;
 import static ru.devlot.model.Factor.Feature;
-
 
 public class ClassifierDepot {
 
@@ -57,7 +57,7 @@ public class ClassifierDepot {
                 }
 
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(SLEEP_TIME);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
