@@ -45,19 +45,21 @@
 
     \section{Постановка задачи}  
     
-        \begin{frame}{Постановка задачи}
+        \begin{frame}{Что есть}
             \begin{center}
                 \includegraphics[scale=0.26]{top-plan.png}~
                 \includegraphics[scale=0.27]{empty.jpg}
             \end{center}                 
         \end{frame}
         
-        \begin{frame}{Постановка задачи}
+        \begin{frame}{Что хотим}
             \begin{center}
                 \includegraphics[scale=0.08]{3d.jpg}~
                 \includegraphics[scale=0.28]{fill.jpg}
             \end{center}                 
         \end{frame}
+        
+    \section{Решение задачи}         
         
         \begin{frame}{Линейное программирование}
             \begin{itemize}
@@ -67,14 +69,14 @@
                 \item 28 м$^2$ на человека
                 \item Вместимость школ $\ge 120$ мест на $1000$ чел.
                 \item Вместимость садиков $\ge 55$ мест на $1000$ чел.
-                \item Хотя бы одно парковочное место на 80 м$^2$ жилья
+                \item $\ge 1$ парковочное место на 80 м$^2$ квартир
                 \item ...
             \end{itemize}
             Площадь квартир $\longrightarrow$ max            
                           
         \end{frame}
         
-        \begin{frame}{Проблематика}
+        \begin{frame}{Сложность}
             \begin{center}
                 \includegraphics[scale=0.075]{nerd.jpg} 
             \end{center}  
@@ -83,19 +85,21 @@
         \begin{frame}{Машинное обучение}
             Фичи
             \begin{enumerate}
-               \item Площадь участка
-               \item Максимальная разрешенная высота зданий на участке
-               \item Периметр участка
+               \item Площадь квартала
+               \item Максимальная разрешенная высота зданий в квартале
+               \item Периметр квартала
             \end{enumerate}
             Ответы
             \begin{enumerate}
-               \item Жилая площадь
+               \item Площадь квартир
                \item Вместимость школ
                \item Вместимость садиков
                \item Число парковочных мест
                \item ...
             \end{enumerate}           
         \end{frame}
+        
+    \section{Майнинг данных}         
         
         \begin{frame}{Майнинг данных}
             \begin{center}
@@ -130,16 +134,16 @@
             \end{center} 
         \end{frame}
         
-        
+    \section{Модели}          
         
         \begin{frame}{Выбор модели}
+        
+            Результаты кросс-валидации на 5 частях (коэффициенты корреляции)
             \begin{footnotesize}
-            
-            
             \begin{table} 
 		        \begin{tabular} {| c | c | c | c | c |}
 				    \hline
-				        &    Площадь квартир   &    Парковки    &    Садики    &    Школы   \\
+				    Модель    &    Площадь квартир   &    Парковки    &    Садики    &    Школы   \\
 				    \hline
 				    Linear Regression    &    67\%    &    67\%    &    86\%    &    71\%    \\		
 				    C4.5    &    46\%    &    68\%    &    51\%    &    27\%    \\
@@ -148,8 +152,6 @@
 				    \hline
 			    \end{tabular}
 		    \end{table}  
-		    
-		    
             \end{footnotesize}
         \end{frame}
         
@@ -158,6 +160,8 @@
                 \includegraphics[scale=0.27]{nn.png}
             \end{center}
         \end{frame}
+        
+    \section{Архитектура}          
         
         \begin{frame}{Архитектура проекта}
             \begin{center}
@@ -171,11 +175,15 @@
             \end{center}
         \end{frame}
         
-        \begin{frame}{В итоге}
+    \section{Результаты}           
+        
+        \begin{frame}{Результат}
             \begin{center}
                 \includegraphics[scale=0.23]{example.png}
             \end{center}
         \end{frame}
+
+    \section{Технологии}        
         
         \begin{frame}{Используемые технологии}
             \begin{description}
@@ -184,6 +192,7 @@
                         \item Java + Spring Framework + Jetty
                         \item Maven
                         \item Spring MVC + JSP
+                        \item Weka
                         \item \bf{Goole Docs API}
                     \end{itemize}
                 ~\\
@@ -192,13 +201,11 @@
                         \item HTML + CSS + Bootstrap
                         \item JavaScript + jQuery + Ajax
                     \end{itemize}
-                ~\\
-                \item [Система контроля версий]
-                    \begin{itemize}
-                        \item Git
-                    \end{itemize}
+               
             \end{description}
         \end{frame}
+        
+    \section{Вопросы}
         
         \begin{frame}{Q\&A}
             \begin{center}
