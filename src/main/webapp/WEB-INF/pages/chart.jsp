@@ -51,6 +51,7 @@
                 renderTo: 'container',
                 margin: 100,
                 type: 'scatter',
+                height: 650,
                 options3d: {
                     enabled: true,
                     alpha: 10,
@@ -66,7 +67,7 @@
                 }
             },
             title: {
-                text: 'Загруженные проекты'
+                text: 'Загруженные кварталы'
             },
             subtitle: {
                 text: 'По которым делается рекомендация'

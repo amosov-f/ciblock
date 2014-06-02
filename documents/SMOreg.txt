@@ -1,0 +1,80 @@
+Train without!
+$жилая  площадь [кв.м]
+
+Correlation coefficient                  0.7591
+Mean absolute error                  92626.7388
+Root mean squared error             147231.7995
+Relative absolute error                 62.4551 %
+Root relative squared error             65.5887 %
+Total Number of Instances               30
+
+$парковки [мест]
+
+Correlation coefficient                  0.7581
+Mean absolute error                    944.31
+Root mean squared error               1231.8026
+Relative absolute error                 60.5365 %
+Root relative squared error             63.7238 %
+Total Number of Instances               30
+
+$садики [уч.]
+
+Correlation coefficient                  0.8327
+Mean absolute error                     81.9409
+Root mean squared error                109.3709
+Relative absolute error                 54.7952 %
+Root relative squared error             54.3359 %
+Total Number of Instances               30
+
+$школы [уч.]
+
+Correlation coefficient                  0.6456
+Mean absolute error                    385.1203
+Root mean squared error                554.0984
+Relative absolute error                 68.0269 %
+Root relative squared error             73.6232 %
+Total Number of Instances               29
+
+
+Train with!
+$жилая  площадь [кв.м]
+
+Correlation coefficient                  0.6156
+Mean absolute error                  99119.2773
+Root mean squared error             171663.9324
+Relative absolute error                 65.261  %
+Root relative squared error             74.5727 %
+Total Number of Instances               30
+
+$парковки [мест]
+
+Correlation coefficient                  0.758
+Mean absolute error                    892.2655
+Root mean squared error               1229.7656
+Relative absolute error                 57.2595 %
+Root relative squared error             64.5355 %
+Total Number of Instances               30
+
+$садики [уч.]
+
+Correlation coefficient                  0.9069
+Mean absolute error                     60.0686
+Root mean squared error                 84.9223
+Relative absolute error                 40.7206 %
+Root relative squared error             42.1589 %
+Total Number of Instances               30
+
+$школы [уч.]
+
+Correlation coefficient                  0.7787
+Mean absolute error                    336.634
+Root mean squared error                442.0472
+Relative absolute error                 62.9851 %
+Root relative squared error             60.9305 %
+Total Number of Instances               29
+
+
+
+SMOreg      жилая площадь   парковки    садики  школы
+without     76%             76%         83%     64%
+with        61%             76%         91%     78%

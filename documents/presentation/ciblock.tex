@@ -19,29 +19,13 @@
 
 \graphicspath{{images/}}
 
-\usetheme{Madrid}
+\usetheme{Boadilla}
 \usecolortheme{seahorse}
+\usefonttheme{serif}
 \renewcommand{\CancelColor}{\color{red}}
 
 \setbeamercolor{footline}{fg=Blue!50}
-\setbeamertemplate{footline}{
-  \leavevmode%
-  \hbox{%
-  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{}%
-    Амосов Федор, СПбГУ
-  \end{beamercolorbox}%
-  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{}%
-    Санкт-Петербург, 2014
-  \end{beamercolorbox}%
-  \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{}%
-  Стр. \insertframenumber{} из \inserttotalframenumber \hspace*{2ex}
-  \end{beamercolorbox}}%
-  \vskip0pt%
-}
-\newcommand\indentdisplays[1]{%
-     \everydisplay{\addtolength\displayindent{#1}%
-     \addtolength\displaywidth{-#1}}}
-\newcommand{\itemi}{\item[\checkmark]}
+\setbeamertemplate{footline}
 
 \title{Автоматическое проектирование кварталов}
 \author[]{
@@ -63,14 +47,14 @@
     
         \begin{frame}{Постановка задачи}
             \begin{center}
-                \includegraphics[scale=0.25]{top-plan.jpg} 
-                \includegraphics[scale=0.25]{empty.jpg}
+                \includegraphics[scale=0.26]{top-plan.png}~
+                \includegraphics[scale=0.27]{empty.jpg}
             \end{center}                 
         \end{frame}
         
         \begin{frame}{Постановка задачи}
             \begin{center}
-                \includegraphics[scale=0.065]{3d.jpg} 
+                \includegraphics[scale=0.08]{3d.jpg}~
                 \includegraphics[scale=0.28]{fill.jpg}
             \end{center}                 
         \end{frame}
@@ -79,10 +63,10 @@
             \begin{itemize}
                 \item Площадь квартир $\le$ 2.3 * Площадь квартала
                 \item Высота домов $\le$ Max разрешенная высота
-                \item Площадь озеленения $\le$ 0.23 * Площадь квартир
+                \item Площадь озеленения $\ge$ 0.23 * Площадь квартир
                 \item 28 м$^2$ на человека
-                \item Вместимость школ $\ge 120$ мест / $1000$ чел.
-                \item Вместимость садиков $\ge 55$ мест / $1000$ чел.
+                \item Вместимость школ $\ge 120$ мест на $1000$ чел.
+                \item Вместимость садиков $\ge 55$ мест на $1000$ чел.
                 \item Хотя бы одно парковочное место на 80 м$^2$ жилья
                 \item ...
             \end{itemize}
@@ -106,28 +90,72 @@
             Ответы
             \begin{enumerate}
                \item Жилая площадь
-               \item Школы
-               \item Садики
-               \item Парковки
+               \item Вместимость школ
+               \item Вместимость садиков
+               \item Число парковочных мест
                \item ...
             \end{enumerate}           
         \end{frame}
         
         \begin{frame}{Майнинг данных}
-            Упоротые картинки РГИС    
+            \begin{center}
+                \includegraphics[scale=0.23]{rgis.png}
+            \end{center} 
         \end{frame}
         
         \begin{frame}{Майнинг данных}
-            Картинка с 48 этажным домом
-        \end{frame}
-        
-        \begin{frame}{Модели для обучения}
-            Данные по разным моделькам
-        \end{frame}
-        
-        \begin{frame}{Похожие проекты}
             \begin{center}
-                \includegraphics[scale=0.25]{nn.png}
+                \includegraphics[scale=0.20]{top-plan.png}~
+                \includegraphics[scale=0.22]{rgis-info.png}
+            \end{center} 
+        \end{frame}
+        
+        \begin{frame}{Хорошие данные}
+            \begin{center}
+                \includegraphics[scale=0.23]{good.png}
+            \end{center} 
+        \end{frame}      
+        
+        \begin{frame}{Плохие данные}
+            \begin{center}
+                \includegraphics[scale=0.23]{bad.png}
+            \end{center} 
+        \end{frame}   
+        
+        \begin{frame}{Итог}
+            \begin{center}
+                \includegraphics[scale=0.20]{data.png}
+                
+                30 кварталов по всему Питеру
+            \end{center} 
+        \end{frame}
+        
+        
+        
+        \begin{frame}{Выбор модели}
+            \begin{footnotesize}
+            
+            
+            \begin{table} 
+		        \begin{tabular} {| c | c | c | c | c |}
+				    \hline
+				        &    Площадь квартир   &    Парковки    &    Садики    &    Школы   \\
+				    \hline
+				    Linear Regression    &    67\%    &    67\%    &    86\%    &    71\%    \\		
+				    C4.5    &    46\%    &    68\%    &    51\%    &    27\%    \\
+				    Perceptron    &    62\%    &    42\%    &   66\%    &    25\%    \\
+				    \bf{SVM}    &    \bf{72\%}    &    \bf{78\%}    &   \bf{86\%}    &    \bf{71\%}    \\
+				    \hline
+			    \end{tabular}
+		    \end{table}  
+		    
+		    
+            \end{footnotesize}
+        \end{frame}
+        
+        \begin{frame}{Похожие кварталы}
+            \begin{center}
+                \includegraphics[scale=0.27]{nn.png}
             \end{center}
         \end{frame}
         
