@@ -33,7 +33,6 @@
         <nav class="blog-nav">
             <a class="blog-nav-item active" href="/form">Главная</a>
             <a class="blog-nav-item" href="/how">Как это работает?</a>
-            <a class="blog-nav-item" href="/about">О нас</a>
         </nav>
     </div>
 </div>
