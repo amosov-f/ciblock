@@ -28,14 +28,14 @@
 
 <body>
 
-<div class="blog-masthead">
-    <div class="container">
-        <nav class="blog-nav">
-            <a class="blog-nav-item active" href="/form">Главная</a>
-            <a class="blog-nav-item" href="/how">Как это работает?</a>
-        </nav>
+    <div class="blog-masthead">
+        <div class="container">
+            <nav class="blog-nav">
+                <a class="blog-nav-item active" href="/form">Главная</a>
+                <a class="blog-nav-item" href="/how">Как это работает?</a>
+            </nav>
+        </div>
     </div>
-</div>
 
     <div class="container">
         <div class="page-header" align="center">
@@ -73,6 +73,10 @@
                 Тут будет рекомендованный предпроект
             </p>
         </div>
+    </div>
+
+    <div class="blog-footer" style="position:absolute; bottom: 0; width:100%;">
+        <p>CiBlock 2014</p><a href="mailto:ciblockinfo@gmail.com">ciblockinfo@gmail.com</a>
     </div>
 
     <script>

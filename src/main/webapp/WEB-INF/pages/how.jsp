@@ -3,10 +3,6 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<%@ page import="ru.devlot.model.Vector" %>
-<%@ page import="java.util.List" %>
-<%@ page import="static ru.devlot.model.Factor.Feature" %>
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -60,10 +56,8 @@
 
     </div>
 
-
     <div class="blog-footer">
-        <a>Ciblock</a>
-        <p>2014</p>
+        <p>CiBlock 2014</p><a href="mailto:ciblockinfo@gmail.com">ciblockinfo@gmail.com</a>
     </div>
 
 </body>
