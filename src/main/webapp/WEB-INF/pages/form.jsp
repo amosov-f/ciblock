@@ -69,6 +69,9 @@
         </div>
 
         <div id="report" class="col-lg-8  col-md-8 col-sm-8 col-xs-12">
+            <p align="center">
+                Тут будет рекомендованный предпроект
+            </p>
         </div>
     </div>
 
