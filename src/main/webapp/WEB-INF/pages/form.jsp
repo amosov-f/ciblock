@@ -16,7 +16,7 @@
     <meta name="description" content>
     <meta name="author" content>
 
-    <title>Lot Developer</title>
+    <title>City Block Designer</title>
 
     <link href="/resources/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="../../resources/utility/css/styles.css" rel="stylesheet">
