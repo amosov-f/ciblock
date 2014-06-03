@@ -75,10 +75,6 @@
         </div>
     </div>
 
-    <div class="blog-footer" style="position:absolute; bottom: 0; width:100%;">
-        <p>CiBlock 2014</p><a href="mailto:ciblockinfo@gmail.com">ciblockinfo@gmail.com</a>
-    </div>
-
     <script>
 
         function submit() {
