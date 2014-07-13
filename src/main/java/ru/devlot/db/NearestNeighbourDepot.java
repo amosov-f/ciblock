@@ -35,6 +35,8 @@ public class NearestNeighbourDepot {
     private Instances learnInstances;
     private List<String> learnIds;
 
+    private static final String REFERENCE = "ссылка";
+
     public void init() {
         new Thread(() -> {
             while (!Thread.interrupted()) {
@@ -64,7 +66,7 @@ public class NearestNeighbourDepot {
         learnIds = new ArrayList<>();
         learnInstances = new Instances("knn", new ArrayList<>(attributes.values()), data.size());
         for (Vector x : data) {
-            if (info.get(x.getId()).contains("ссылка")) {
+            if (info.get(x.getId()).contains(REFERENCE)) {
                 learnIds.add(x.getId());
                 learnInstances.add(toInstance(x));
             }
@@ -104,7 +106,7 @@ public class NearestNeighbourDepot {
     private Info toInfo(Instance instance) {
         for (int i = 0; i < learnInstances.size(); ++i) {
             if (learnInstances.get(i).toString().equals(instance.toString())) {
-                return new Info(learnIds.get(i), info.get(learnIds.get(i)).get("ссылка"));
+                return new Info(learnIds.get(i), info.get(learnIds.get(i)).get(REFERENCE));
             }
         }
         return null;

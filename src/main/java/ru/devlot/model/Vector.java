@@ -6,9 +6,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public class Vector {
-
-    private static final NumberFormat format = NumberFormat.getInstance(Locale.FRANCE);
+public final class Vector {
 
     private final String id;
 
@@ -24,9 +22,7 @@ public class Vector {
 
     public double getDouble(String name) {
         try {
-            synchronized (format) {
-                return format.parse(name2value.get(name)).doubleValue();
-            }
+            return NumberFormat.getInstance(Locale.FRANCE).parse(name2value.get(name)).doubleValue();
         } catch (ParseException | NumberFormatException e) {
             System.out.println(name + " " + name2value.get(name) + " parse error!");
             throw new RuntimeException(e);

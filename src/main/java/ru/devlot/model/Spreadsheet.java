@@ -2,7 +2,7 @@ package ru.devlot.model;
 
 import java.util.*;
 
-public class Spreadsheet implements Iterable<Vector> {
+public final class Spreadsheet implements Iterable<Vector> {
 
     private final Map<String, Factor> name2factor = new HashMap<>();
 

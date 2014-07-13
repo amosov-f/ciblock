@@ -1,6 +1,6 @@
 package ru.devlot.model;
 
-public class Info {
+public final class Info {
 
     private final String id;
 

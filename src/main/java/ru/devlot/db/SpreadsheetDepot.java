@@ -12,14 +12,17 @@ import ru.devlot.model.Factor;
 import ru.devlot.model.Spreadsheet;
 import ru.devlot.model.Vector;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import static ru.devlot.LotDeveloperEngine.SERVER_NAME;
 import static ru.devlot.LotDeveloperEngine.SLEEP_TIME;
 
+@ThreadSafe
 public class SpreadsheetDepot {
 
     private Spreadsheet spreadsheet;
@@ -37,21 +40,22 @@ public class SpreadsheetDepot {
         }
     }
 
+    private final CountDownLatch latch = new CountDownLatch(1);
+
     public SpreadsheetDepot(String worksheetId) {
         this.worksheetId = worksheetId;
         new Thread(() -> {
             while (!Thread.interrupted()) {
-                synchronized (SpreadsheetDepot.this) {
-                    try {
-                        spreadsheet = upload();
-                    } catch (RecentUpdateException e) {
-                        e.printStackTrace(System.out);
-                    } catch (ServiceException | IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    System.out.println(spreadsheet);
+                try {
+                    upload();
+                } catch (RecentUpdateException e) {
+                    e.printStackTrace(System.out);
+                } catch (ServiceException | IOException e) {
+                    e.printStackTrace();
                 }
+
+                System.out.println(spreadsheet);
+
                 try {
                     Thread.sleep(SLEEP_TIME);
                 } catch (InterruptedException e) {
@@ -61,11 +65,16 @@ public class SpreadsheetDepot {
         }).start();
     }
 
-    public synchronized Spreadsheet get() {
+    public Spreadsheet get() {
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return spreadsheet;
     }
 
-    private Spreadsheet upload() throws ServiceException, IOException, RecentUpdateException {
+    private void upload() throws ServiceException, IOException, RecentUpdateException {
         Spreadsheet spreadsheet = new Spreadsheet();
 
         SpreadsheetService service = new SpreadsheetService("devlot-1.0.0");
@@ -79,12 +88,18 @@ public class SpreadsheetDepot {
             throw new RecentUpdateException(cellFeed.getUpdated());
         }
 
+        List<Factor.Class> classes = new ArrayList<>();
         List<String> names = new ArrayList<>();
         for (CellEntry cell : cellFeed.getEntries()) {
             String description = cell.getCell().getValue();
 
             Factor factor = Factor.parse(description);
+
             spreadsheet.addFactor(factor);
+
+            if (factor instanceof Factor.Class) {
+                classes.add((Factor.Class) factor);
+            }
             names.add(factor.getName());
         }
 
@@ -92,26 +107,26 @@ public class SpreadsheetDepot {
 
         ListFeed listFeed = service.getFeed(listFeedUrl, ListFeed.class);
         for (ListEntry row : listFeed.getEntries()) {
-            Vector vector = new Vector(row.getTitle().getPlainText());
+            Vector x = new Vector(row.getTitle().getPlainText());
 
             List<String> tags = new ArrayList<>(row.getCustomElements().getTags());
             tags = tags.subList(1, tags.size());
             for (int i = 0; i < tags.size(); ++i) {
-                vector.add(names.get(i), row.getCustomElements().getValue(tags.get(i)));
+                x.add(names.get(i), row.getCustomElements().getValue(tags.get(i)));
             }
 
-            spreadsheet.add(vector);
-        }
+            spreadsheet.add(x);
 
-        for (Vector x : spreadsheet) {
-            for (Factor.Class type : spreadsheet.getFactors(Factor.Class.class)) {
+            for (Factor.Class type : classes) {
                 type.add(x.get(type.getName()));
             }
         }
 
-        return spreadsheet;
+        this.spreadsheet = spreadsheet;
+        latch.countDown();
     }
 
+    @ThreadSafe
     public static class DataDepot extends SpreadsheetDepot {
 
         public DataDepot() {
@@ -120,6 +135,7 @@ public class SpreadsheetDepot {
 
     }
 
+    @ThreadSafe
     public static class InfoDepot extends SpreadsheetDepot {
 
         public InfoDepot() {

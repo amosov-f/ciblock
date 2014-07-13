@@ -1,5 +1,6 @@
 package ru.devlot.model;
 
+import javax.annotation.concurrent.Immutable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Immutable
 public class Factor {
 
     private final String name;
@@ -69,7 +71,8 @@ public class Factor {
         return name + " [" + dimension + "]";
     }
 
-    public static class Feature extends Factor {
+    @Immutable
+    public static final class Feature extends Factor {
 
         protected Feature(String name, String dimension) {
             super(name, dimension);
@@ -77,6 +80,7 @@ public class Factor {
 
     }
 
+    @Immutable
     public static class Answer extends Factor {
 
         protected Answer(String name, String dimension) {
@@ -85,7 +89,7 @@ public class Factor {
 
     }
 
-    public static class Regression extends Answer {
+    public static final class Regression extends Answer {
 
         protected Regression(String name, String dimension) {
             super(name, dimension);
@@ -98,7 +102,7 @@ public class Factor {
 
     }
 
-    public static class Class extends Answer {
+    public static final class Class extends Answer {
 
         private final Set<String> classes = new HashSet<>();
 

@@ -20,6 +20,8 @@ import static ru.devlot.model.Factor.Feature;
 @Controller
 public class FormController {
 
+    private static final int K = 3;
+
     @Autowired
     ClassifierDepot classifierDepot;
 
@@ -55,7 +57,7 @@ public class FormController {
         values.putAll(classifierDepot.classify(features));
         model.addAttribute("values", values);
 
-        model.addAttribute("nearestNeighbours", nearestNeighbourDepot.getKNearestNeighbours(features, 3));
+        model.addAttribute("nearestNeighbours", nearestNeighbourDepot.getKNearestNeighbours(features, K));
 
         return "report";
     }
