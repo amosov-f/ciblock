@@ -49,7 +49,6 @@ public class FormController {
 
         Spreadsheet spreadsheet = classifierDepot.get();
 
-
         model.addAttribute("features", spreadsheet.getFactors(Feature.class));
         model.addAttribute("answers", spreadsheet.getFactors(Answer.class));
 

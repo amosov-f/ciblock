@@ -16,7 +16,7 @@
     <div class="panel panel-default">
         <div class="panel-heading"><h1 class="panel-title">Рекомендованный предпроект</h1></div>
         <div class="panel-body">
-            <div class="col-lg-6">
+            <div class="col-lg-7">
                 <blockquote>
             <%
                 for (Feature feature : features) {
@@ -29,36 +29,8 @@
                 }
             %>
                 </blockquote>
-                <blockquote style="border-color: limegreen">
-            <%
-                for (Answer answer : answers) {
-            %>
-                    <p>
-                        <%= answer.getName() %>:
-                    <%
-                        if (answer instanceof Class) {
-                    %>
-                            <%= ((Class) answer).getClasses().get(values.get(answer.getName()).intValue()) %>
-                    <%
-                        } else {
-                    %>
-                            <%= values.get(answer.getName()).intValue() %>
-                    <%
-                        }
-                        if (answer.getDimension() != null) {
-                    %>
-                            <%= answer.getDimension() %>
-                    <%
-                        }
-                    %>
-                    </p>
-            <%
-                }
-            %>
-                </blockquote>
-
             </div>
-            <div class="col-lg-6">
+            <div class="col-lg-5">
                 <h5>Похожие проекты</h5>
                 <ol>
                 <%
@@ -69,6 +41,36 @@
                     }
                 %>
                 </ol>
+            </div>
+            <div class="col-lg-12">
+                <blockquote style="border-color: limegreen">
+                    <%
+                        for (Answer answer : answers) {
+                    %>
+                    <p>
+                        <%= answer.getName() %>:
+                        <%
+                            if (answer instanceof Class) {
+                                int index = values.get(answer.getName()).intValue();
+                        %>
+                        <%= ((Class) answer).getClasses().get(index) %>
+                        <%
+                        } else {
+                        %>
+                        <%= values.get(answer.getName()).intValue() %>
+                        <%
+                            }
+                            if (answer.getDimension() != null) {
+                        %>
+                        <%= answer.getDimension() %>
+                        <%
+                            }
+                        %>
+                    </p>
+                    <%
+                        }
+                    %>
+                </blockquote>
             </div>
         </div>
 

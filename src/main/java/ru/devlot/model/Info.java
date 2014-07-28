@@ -1,5 +1,8 @@
 package ru.devlot.model;
 
+import javax.annotation.concurrent.Immutable;
+
+@Immutable
 public final class Info {
 
     private final String id;

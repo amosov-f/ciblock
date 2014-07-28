@@ -89,6 +89,7 @@ public class Factor {
 
     }
 
+    @Immutable
     public static final class Regression extends Answer {
 
         protected Regression(String name, String dimension) {

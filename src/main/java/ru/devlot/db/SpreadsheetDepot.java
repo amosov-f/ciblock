@@ -77,7 +77,7 @@ public class SpreadsheetDepot {
     private void upload() throws ServiceException, IOException, RecentUpdateException {
         Spreadsheet spreadsheet = new Spreadsheet();
 
-        SpreadsheetService service = new SpreadsheetService("devlot-1.0.0");
+        SpreadsheetService service = new SpreadsheetService("ciblock-1.0.0");
         service.setUserCredentials(LotDeveloperEngine.username, LotDeveloperEngine.password);
         service.setProtocolVersion(SpreadsheetService.Versions.V3);
 

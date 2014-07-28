@@ -9,6 +9,7 @@ import ru.devlot.model.Spreadsheet;
 import ru.devlot.model.Vector;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.classifiers.functions.LeastMedSq;
 import weka.classifiers.functions.SMO;
 import weka.classifiers.functions.SMOreg;
 import weka.core.Attribute;
@@ -33,11 +34,11 @@ public class ClassifierDepot {
 
     private static final Map<
             java.lang.Class<? extends Answer>,
-            java.lang.Class<? extends Classifier>
+            List<java.lang.Class<? extends Classifier>>
     > type2classifier = new HashMap<>();
     static {
-        type2classifier.put(Regression.class, SMOreg.class);
-        type2classifier.put(Class.class, SMO.class);
+        type2classifier.put(Regression.class, Arrays.asList(LeastMedSq.class, SMOreg.class));
+        type2classifier.put(Class.class, Arrays.asList(SMO.class));
     }
 
     public void init() {
@@ -90,7 +91,6 @@ public class ClassifierDepot {
         }
     }
 
-
     private void train(Answer answer) throws Exception {
         System.out.println(answer);
 
@@ -104,11 +104,25 @@ public class ClassifierDepot {
         }
         learn.setClass(attributes.get(answer.getName()));
 
-        Classifier classifier = type2classifier.get(answer.getClass()).getConstructor().newInstance();
-        classifier.buildClassifier(learn);
+        Classifier classifier = null;
+        double bestCorrelation = -1;
+
+        for (java.lang.Class<? extends Classifier> classifierClass : type2classifier.get(answer.getClass())) {
+            Classifier curClassifier = classifierClass.newInstance();
+            curClassifier.buildClassifier(learn);
+
+            Evaluation evaluation = new Evaluation(learn);
+            evaluation.crossValidateModel(curClassifier, learn, 5, new Random());
+
+            if (evaluation.correlationCoefficient() > bestCorrelation) {
+                classifier = curClassifier;
+                bestCorrelation = evaluation.correlationCoefficient();
+            }
+        }
 
         Evaluation evaluation = new Evaluation(learn);
         evaluation.crossValidateModel(classifier, learn, 5, new Random());
+
         System.out.println(evaluation.toSummaryString());
 
         classifiers.put(answer.getName(), classifier);
@@ -154,7 +168,7 @@ public class ClassifierDepot {
         return instance;
     }
 
-    public synchronized Spreadsheet get() {
+    public Spreadsheet get() {
         return data;
     }
 

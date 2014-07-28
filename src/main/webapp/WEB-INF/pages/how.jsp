@@ -48,7 +48,7 @@
             <img src="/resources/images/exc.PNG" class="img-responsive img-rounded col-lg-6 col-md-6 col-xs-6 col-sm-12"  />
             <img src="/resources/images/rgis.PNG" class="img-responsive img-rounded col-lg-6 col-md-6 col-xs-6 col-sm-12" />
         </div>
-        <div class="row" style="margin: 0px;" >
+        <div class="row" style="margin: 0;" >
             <hr>
         </div>
         <p>Затем математическими методами мы расчитываем показатели, которые можно получить из участка.</p>

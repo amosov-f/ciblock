@@ -99,7 +99,6 @@
                 }
             }
 
-            console.log(JSON.stringify(features));
             $.ajax({
                 url: '/submit',
                 data: 'feature_json=' + JSON.stringify(features),

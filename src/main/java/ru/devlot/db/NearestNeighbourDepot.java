@@ -40,7 +40,6 @@ public class NearestNeighbourDepot {
     public void init() {
         new Thread(() -> {
             while (!Thread.interrupted()) {
-
                 synchronized (NearestNeighbourDepot.this) {
                     data = dataDepot.get();
                     info = infoDepot.get();

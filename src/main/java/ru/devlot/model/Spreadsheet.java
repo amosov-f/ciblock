@@ -33,7 +33,7 @@ public final class Spreadsheet implements Iterable<Vector> {
         List<T> features = new ArrayList<>();
         for (Factor factor : name2factor.values()) {
             if (type.isInstance(factor)) {
-                features.add((T) factor);
+                features.add(type.cast(factor));
             }
         }
         return features;
