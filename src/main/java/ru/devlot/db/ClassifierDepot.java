@@ -17,46 +17,43 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.util.*;
 
 import static ru.devlot.LotDeveloperEngine.SLEEP_TIME;
 import static ru.devlot.db.SpreadsheetDepot.DataDepot;
 import static ru.devlot.model.Factor.Feature;
 
+@ThreadSafe
 public class ClassifierDepot {
 
     private DataDepot dataDepot;
 
-    private Map<String, Classifier> classifiers;
-
     private Spreadsheet data;
+
     private Map<String, Attribute> attributes;
+    private Map<String, Classifier> classifiers;
 
     private static final Map<
             java.lang.Class<? extends Answer>,
             List<java.lang.Class<? extends Classifier>>
-    > type2classifier = new HashMap<>();
+    > type2classifiers = new HashMap<>();
     static {
-        type2classifier.put(Regression.class, Arrays.asList(LeastMedSq.class, SMOreg.class));
-        type2classifier.put(Class.class, Arrays.asList(SMO.class));
+        type2classifiers.put(Regression.class, Arrays.asList(LeastMedSq.class, SMOreg.class));
+        type2classifiers.put(Class.class, Arrays.asList(SMO.class));
     }
 
     public void init() {
         new Thread(() -> {
             while (!Thread.interrupted()) {
-                synchronized (ClassifierDepot.this) {
-                    data = dataDepot.get();
+                try {
+                    train();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-                    try {
-                        initAttributes();
-                        train();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    if (classifiers != null) {
-                        System.out.println("classifiers: " + classifiers.values());
-                    }
+                if (classifiers != null) {
+                    System.out.println("classifiers: " + classifiers.values());
                 }
 
                 try {
@@ -68,8 +65,8 @@ public class ClassifierDepot {
         }).start();
     }
 
-    public synchronized Map<String, Double> classify(Map<String, Double> features) throws Exception {
-        Instance instance = new DenseInstance(getFeatures().size() + 1);
+    public Map<String, Double> classify(Map<String, Double> features) throws Exception {
+        Instance instance = new DenseInstance(features.size() + 1);
         for (String name : features.keySet()) {
             instance.setValue(attributes.get(name), features.get(name));
         }
@@ -82,94 +79,86 @@ public class ClassifierDepot {
         return answers;
     }
 
+    public Spreadsheet get() {
+        return data;
+    }
+
     private void train() throws Exception {
-        System.out.println("Train!");
+        Spreadsheet data = dataDepot.get();
 
-        classifiers = new HashMap<>();
-        for (Answer answer : data.getFactors(Answer.class)) {
-            train(answer);
-        }
-    }
+        List<Feature> features = data.getFactors(Feature.class);
 
-    private void train(Answer answer) throws Exception {
-        System.out.println(answer);
-
-        Instances learn = new Instances(answer.getName(), getAttributes(answer.getName()), data.size());
-
-        for (Vector x : data) {
-            Instance instance = toInstance(x, answer.getName());
-            if (instance != null) {
-                learn.add(instance);
-            }
-        }
-        learn.setClass(attributes.get(answer.getName()));
-
-        Classifier classifier = null;
-        double bestCorrelation = -1;
-
-        for (java.lang.Class<? extends Classifier> classifierClass : type2classifier.get(answer.getClass())) {
-            Classifier curClassifier = classifierClass.newInstance();
-            curClassifier.buildClassifier(learn);
-
-            Evaluation evaluation = new Evaluation(learn);
-            evaluation.crossValidateModel(curClassifier, learn, 5, new Random());
-
-            if (evaluation.correlationCoefficient() > bestCorrelation) {
-                classifier = curClassifier;
-                bestCorrelation = evaluation.correlationCoefficient();
-            }
-        }
-
-        Evaluation evaluation = new Evaluation(learn);
-        evaluation.crossValidateModel(classifier, learn, 5, new Random());
-
-        System.out.println(evaluation.toSummaryString());
-
-        classifiers.put(answer.getName(), classifier);
-    }
-
-    private void initAttributes() {
-        attributes = new HashMap<>();
+        Map<String, Attribute> attributes = new HashMap<>();
         for (Factor factor : data.getFactors()) {
             attributes.put(factor.getName(), new Attribute(factor.getName()));
         }
-    }
 
-    private ArrayList<Attribute> getAttributes(String answerName) {
-        ArrayList<Attribute> attributes = new ArrayList<>(getFeatures());
-        attributes.add(this.attributes.get(answerName));
-        return attributes;
-    }
+        System.out.println("Train!");
 
-    private List<Attribute> getFeatures() {
-        ArrayList<Attribute> attributes = new ArrayList<>();
-        for (Feature feature : data.getFactors(Feature.class)) {
-            attributes.add(this.attributes.get(feature.getName()));
+        Map<String, Classifier> classifiers = new HashMap<>();
+        for (Answer answer : data.getFactors(Answer.class)) {
+            System.out.println(answer);
+
+            Attribute answerAttribute = attributes.get(answer.getName());
+
+            ArrayList<Attribute> answerAttributes = new ArrayList<>();
+            for (Feature feature : features) {
+                answerAttributes.add(attributes.get(feature.getName()));
+            }
+            answerAttributes.add(answerAttribute);
+
+            Instances learn = new Instances(answer.getName(), answerAttributes, data.size());
+
+            for (Vector x : data) {
+                if (!x.contains(answer.getName())) {
+                    continue;
+                }
+
+                Instance instance = new DenseInstance(answerAttributes.size());
+                for (Feature feature : features) {
+                    instance.setValue(attributes.get(feature.getName()), x.getDouble(feature.getName()));
+                }
+
+                if (answer instanceof Class) {
+                    instance.setValue(answerAttribute, x.get(answer.getName()));
+                } else {
+                    instance.setValue(answerAttribute, x.getDouble(answer.getName()));
+                }
+
+                learn.add(instance);
+            }
+            learn.setClass(answerAttribute);
+
+
+            Classifier classifier = null;
+            double bestCorrelation = -1;
+
+            for (java.lang.Class<? extends Classifier> classifierClass : type2classifiers.get(answer.getClass())) {
+                Classifier curClassifier = classifierClass.newInstance();
+                curClassifier.buildClassifier(learn);
+
+                Evaluation evaluation = new Evaluation(learn);
+                evaluation.crossValidateModel(curClassifier, learn, 5, new Random());
+
+                if (evaluation.correlationCoefficient() > bestCorrelation) {
+                    classifier = curClassifier;
+                    bestCorrelation = evaluation.correlationCoefficient();
+                }
+            }
+
+            Evaluation evaluation = new Evaluation(learn);
+            evaluation.crossValidateModel(classifier, learn, 5, new Random());
+
+            System.out.println(evaluation.toSummaryString());
+
+            classifiers.put(answer.getName(), classifier);
         }
-        return attributes;
-    }
 
-    private Instance toInstance(Vector x, String answerName) {
-        if (!x.contains(answerName)) {
-            return null;
+        synchronized (this) {
+            this.data = data;
+            this.attributes = attributes;
+            this.classifiers = classifiers;
         }
-
-        Instance instance = new DenseInstance(getAttributes(answerName).size());
-        for (Feature feature : data.getFactors(Feature.class)) {
-            instance.setValue(attributes.get(feature.getName()), x.getDouble(feature.getName()));
-        }
-
-        if (data.getFactor(answerName) instanceof Class) {
-            instance.setValue(attributes.get(answerName), x.get(answerName));
-        } else {
-            instance.setValue(attributes.get(answerName), x.getDouble(answerName));
-        }
-
-        return instance;
-    }
-
-    public Spreadsheet get() {
-        return data;
     }
 
     @Required
