@@ -10,7 +10,6 @@ import com.google.gdata.util.ServiceException;
 import ru.devlot.LotDeveloperEngine;
 import ru.devlot.model.Factor;
 import ru.devlot.model.Spreadsheet;
-import ru.devlot.model.Vector;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.IOException;
@@ -21,6 +20,8 @@ import java.util.concurrent.CountDownLatch;
 
 import static ru.devlot.LotDeveloperEngine.SERVER_NAME;
 import static ru.devlot.LotDeveloperEngine.SLEEP_TIME;
+import static ru.devlot.model.Factor.Class.ExpandingClass;
+import static ru.devlot.model.Vector.ExpandingVector;
 
 @ThreadSafe
 public class SpreadsheetDepot {
@@ -75,7 +76,7 @@ public class SpreadsheetDepot {
     }
 
     private void upload() throws ServiceException, IOException, RecentUpdateException {
-        Spreadsheet spreadsheet = new Spreadsheet();
+        Spreadsheet.ExpandingSpreadsheet spreadsheet = new Spreadsheet.ExpandingSpreadsheet();
 
         SpreadsheetService service = new SpreadsheetService("ciblock-1.0.0");
         service.setUserCredentials(LotDeveloperEngine.username, LotDeveloperEngine.password);
@@ -88,7 +89,7 @@ public class SpreadsheetDepot {
             throw new RecentUpdateException(cellFeed.getUpdated());
         }
 
-        List<Factor.Class> classes = new ArrayList<>();
+        List<ExpandingClass> classes = new ArrayList<>();
         List<String> names = new ArrayList<>();
         for (CellEntry cell : cellFeed.getEntries()) {
             String description = cell.getCell().getValue();
@@ -97,8 +98,8 @@ public class SpreadsheetDepot {
 
             spreadsheet.addFactor(factor);
 
-            if (factor instanceof Factor.Class) {
-                classes.add((Factor.Class) factor);
+            if (factor instanceof ExpandingClass) {
+                classes.add((ExpandingClass) factor);
             }
             names.add(factor.getName());
         }
@@ -107,7 +108,7 @@ public class SpreadsheetDepot {
 
         ListFeed listFeed = service.getFeed(listFeedUrl, ListFeed.class);
         for (ListEntry row : listFeed.getEntries()) {
-            Vector x = new Vector(row.getTitle().getPlainText());
+            ExpandingVector x = new ExpandingVector(row.getTitle().getPlainText());
 
             List<String> tags = new ArrayList<>(row.getCustomElements().getTags());
             tags = tags.subList(1, tags.size());
@@ -117,8 +118,10 @@ public class SpreadsheetDepot {
 
             spreadsheet.add(x);
 
-            for (Factor.Class type : classes) {
-                type.add(x.get(type.getName()));
+            for (ExpandingClass clazz : classes) {
+                if (x.get(clazz.getName()) != null) {
+                    clazz.addValue(x.get(clazz.getName()));
+                }
             }
         }
 

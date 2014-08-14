@@ -14,9 +14,6 @@ import ru.devlot.model.Vector;
 import java.util.HashMap;
 import java.util.Map;
 
-import static ru.devlot.model.Factor.Answer;
-import static ru.devlot.model.Factor.Feature;
-
 @Controller
 public class FormController {
 
@@ -32,7 +29,7 @@ public class FormController {
     public String form(Model model) {
         Spreadsheet spreadsheet = classifierDepot.get();
 
-        model.addAttribute("features", spreadsheet.getFactors(Feature.class));
+        model.addAttribute("features", spreadsheet.getFeatures());
 
         Vector example = spreadsheet.iterator().next();
         model.addAttribute("example", example);
@@ -49,14 +46,13 @@ public class FormController {
 
         Spreadsheet spreadsheet = classifierDepot.get();
 
-        model.addAttribute("features", spreadsheet.getFactors(Feature.class));
-        model.addAttribute("answers", spreadsheet.getFactors(Answer.class));
+        model.addAttribute("features", spreadsheet.getFeatures());
+        model.addAttribute("answers", spreadsheet.getAnswers());
 
-        Map<String, Double> values = new HashMap<>(features);
-        values.putAll(classifierDepot.classify(features));
-        model.addAttribute("values", values);
+        model.addAttribute("feature values", features);
+        model.addAttribute("values", classifierDepot.classify(features));
 
-        model.addAttribute("nearestNeighbours", nearestNeighbourDepot.getKNearestNeighbours(features, K));
+        model.addAttribute("nearest neighbours", nearestNeighbourDepot.getKNearestNeighbours(features, K));
 
         return "report";
     }

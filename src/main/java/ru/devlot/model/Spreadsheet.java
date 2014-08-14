@@ -1,24 +1,17 @@
 package ru.devlot.model;
 
+import javax.annotation.concurrent.Immutable;
 import java.util.*;
 
-public final class Spreadsheet implements Iterable<Vector> {
+import static ru.devlot.model.Factor.Answer;
+import static ru.devlot.model.Factor.Feature;
 
-    private final Map<String, Factor> name2factor = new HashMap<>();
+@Immutable
+public class Spreadsheet implements Iterable<Vector> {
 
-    private final Map<String, Vector> id2vector = new HashMap<>();
+    protected final Map<String, Factor> name2factor = new HashMap<>();
 
-    public void addFactor(Factor factor) {
-        name2factor.put(factor.getName(), factor);
-    }
-
-    public void add(Vector x) {
-        id2vector.put(x.getId(), x);
-    }
-
-    public Factor getFactor(String name) {
-        return name2factor.get(name);
-    }
+    protected final Map<String, Vector> id2vector = new HashMap<>();
 
     public Vector get(String id) {
         for (Vector x : this) {
@@ -29,11 +22,11 @@ public final class Spreadsheet implements Iterable<Vector> {
         return null;
     }
 
-    public <T extends Factor> List<T> getFactors(java.lang.Class<T> type) {
+    private <T extends Factor> List<T> getFactors(java.lang.Class<T> clazz) {
         List<T> features = new ArrayList<>();
         for (Factor factor : name2factor.values()) {
-            if (type.isInstance(factor)) {
-                features.add(type.cast(factor));
+            if (clazz.isInstance(factor)) {
+                features.add(clazz.cast(factor));
             }
         }
         return features;
@@ -41,6 +34,14 @@ public final class Spreadsheet implements Iterable<Vector> {
 
     public List<Factor> getFactors() {
         return getFactors(Factor.class);
+    }
+
+    public List<Feature> getFeatures() {
+        return getFactors(Feature.class);
+    }
+
+    public List<Answer> getAnswers() {
+        return getFactors(Answer.class);
     }
 
     public int size() {
@@ -57,6 +58,18 @@ public final class Spreadsheet implements Iterable<Vector> {
             values.add(x.getDouble(name));
         }
         return values;
+    }
+
+    public static class ExpandingSpreadsheet extends Spreadsheet {
+
+        public void addFactor(Factor factor) {
+            name2factor.put(factor.getName(), factor);
+        }
+
+        public void add(Vector x) {
+            id2vector.put(x.getId(), x);
+        }
+
     }
 
     @Override

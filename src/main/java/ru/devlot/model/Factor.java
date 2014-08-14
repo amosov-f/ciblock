@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static ru.devlot.model.Factor.Class.ExpandingClass;
+
 @Immutable
 public class Factor {
 
@@ -57,7 +59,7 @@ public class Factor {
             factor = new Regression(name, dimension);
         }
         if (description.startsWith(CLASS_PREFIX)) {
-            factor = new Class(name, dimension);
+            factor = new ExpandingClass(name, dimension);
         }
 
         return factor;
@@ -103,20 +105,28 @@ public class Factor {
 
     }
 
-    public static final class Class extends Answer {
+    public static class Class extends Answer {
 
-        private final Set<String> classes = new HashSet<>();
+        protected final Set<String> classes = new HashSet<>();
 
         protected Class(String name, String dimension) {
             super(name, dimension);
         }
 
-        public void add(String newClass) {
-            classes.add(newClass);
-        }
-
         public List<String> getClasses() {
             return new ArrayList<>(classes);
+        }
+
+        public static final class ExpandingClass extends Class {
+
+            protected ExpandingClass(String name, String dimension) {
+                super(name, dimension);
+            }
+
+            public void addValue(String value) {
+                classes.add(value);
+            }
+
         }
 
         @Override

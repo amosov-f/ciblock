@@ -1,23 +1,21 @@
 package ru.devlot.model;
 
+import javax.annotation.concurrent.Immutable;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public final class Vector {
+@Immutable
+public class Vector {
 
-    private final String id;
+    protected final String id;
 
-    private final Map<String, String> name2value = new HashMap<>();
+    protected final Map<String, String> name2value = new HashMap<>();
 
     public Vector(String id) {
         this.id = id;
-    }
-
-    public void add(String name, String value) {
-        name2value.put(name, value);
     }
 
     public double getDouble(String name) {
@@ -39,6 +37,18 @@ public final class Vector {
 
     public String getId() {
         return id;
+    }
+
+    public static class ExpandingVector extends Vector {
+
+        public ExpandingVector(String id) {
+            super(id);
+        }
+
+        public void add(String name, String value) {
+            name2value.put(name, value);
+        }
+
     }
 
     @Override

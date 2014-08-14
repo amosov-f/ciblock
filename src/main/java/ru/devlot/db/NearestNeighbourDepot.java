@@ -10,6 +10,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.neighboursearch.LinearNNSearch;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ import static ru.devlot.db.SpreadsheetDepot.DataDepot;
 import static ru.devlot.db.SpreadsheetDepot.InfoDepot;
 import static ru.devlot.model.Factor.Feature;
 
+@ThreadSafe
 public class NearestNeighbourDepot {
 
     private DataDepot dataDepot;
@@ -32,24 +34,16 @@ public class NearestNeighbourDepot {
 
     private LinearNNSearch search;
 
-    private Instances learnInstances;
-    private List<String> learnIds;
-
     private static final String REFERENCE = "ссылка";
+    private static final String ID = "id";
 
     public void init() {
         new Thread(() -> {
             while (!Thread.interrupted()) {
-                synchronized (NearestNeighbourDepot.this) {
-                    data = dataDepot.get();
-                    info = infoDepot.get();
-
-                    try {
-                        initAttributes();
-                        train();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                try {
+                    train();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
                 try {
@@ -62,53 +56,56 @@ public class NearestNeighbourDepot {
     }
 
     private void train() throws Exception {
-        learnIds = new ArrayList<>();
-        learnInstances = new Instances("knn", new ArrayList<>(attributes.values()), data.size());
-        for (Vector x : data) {
-            if (info.get(x.getId()).contains(REFERENCE)) {
-                learnIds.add(x.getId());
-                learnInstances.add(toInstance(x));
-            }
+        Spreadsheet data = dataDepot.get();
+        Spreadsheet info = infoDepot.get();
+
+        Attribute idAttribute = new Attribute(ID, (List<String>) null);
+
+        Map<String, Attribute> attributes = new HashMap<>();
+        for (Feature feature : data.getFeatures()) {
+            attributes.put(feature.getName(), new Attribute(feature.getName()));
         }
-        search = new LinearNNSearch(learnInstances);
+        attributes.put(ID, idAttribute);
+
+        Instances learn = new Instances("knn", new ArrayList<>(attributes.values()), data.size());
+        learn.setClass(idAttribute);
+        for (Vector x : data) {
+            if (!info.get(x.getId()).contains(REFERENCE)) {
+                continue;
+            }
+
+            Instance instance = new DenseInstance(attributes.size());
+            for (Feature feature : data.getFeatures()) {
+                instance.setValue(attributes.get(feature.getName()), x.getDouble(feature.getName()));
+            }
+            instance.setValue(idAttribute, x.getId());
+
+            learn.add(instance);
+        }
+
+        LinearNNSearch search = new LinearNNSearch(learn);
+
+        synchronized (this) {
+            this.data = data;
+            this.info = info;
+            this.attributes = attributes;
+            this.search = search;
+        }
     }
 
     public synchronized List<Info> getKNearestNeighbours(Map<String, Double> x, int k) throws Exception {
         Instance instance = new DenseInstance(attributes.size());
-        for (Feature feature : data.getFactors(Feature.class)) {
+        for (Feature feature : data.getFeatures()) {
             instance.setValue(attributes.get(feature.getName()), x.get(feature.getName()));
         }
 
         List<Info> neighbours = new ArrayList<>();
         for (Instance neighbour : search.kNearestNeighbours(instance, k)) {
-            neighbours.add(toInfo(neighbour));
+            String id = neighbour.stringValue(attributes.get(ID));
+            neighbours.add(new Info(id, info.get(id).get(REFERENCE)));
         }
 
         return neighbours;
-    }
-
-    private Instance toInstance(Vector x) {
-        Instance instance = new DenseInstance(attributes.size());
-        for (Feature feature : data.getFactors(Feature.class)) {
-            instance.setValue(attributes.get(feature.getName()), x.getDouble(feature.getName()));
-        }
-        return instance;
-    }
-
-    private void initAttributes() {
-        attributes = new HashMap<>();
-        for (Feature feature : data.getFactors(Feature.class)) {
-            attributes.put(feature.getName(), new Attribute(feature.getName()));
-        }
-    }
-
-    private Info toInfo(Instance instance) {
-        for (int i = 0; i < learnInstances.size(); ++i) {
-            if (learnInstances.get(i).toString().equals(instance.toString())) {
-                return new Info(learnIds.get(i), info.get(learnIds.get(i)).get(REFERENCE));
-            }
-        }
-        return null;
     }
 
     @Required
