@@ -11,6 +11,8 @@ import ru.devlot.db.NearestNeighbourDepot;
 import ru.devlot.model.Spreadsheet;
 import ru.devlot.model.Vector;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,10 +40,10 @@ public class FormController {
     }
 
     @RequestMapping("/submit")
-    public String submit(@RequestParam String feature_json, Model model) throws Exception {
+    public String submit(HttpServletRequest request, Model model) throws Exception {
         Map<String, Double> features = new HashMap<>();
-        for (Map.Entry<String, String> entry : ((Map<String, String>) JSON.parse(feature_json)).entrySet()) {
-            features.put(entry.getKey(), new Double(entry.getValue()));
+        for (String name : Collections.list(request.getParameterNames())) {
+            features.put(name, new Double(request.getParameter(name)));
         }
 
         Spreadsheet spreadsheet = classifierDepot.get();

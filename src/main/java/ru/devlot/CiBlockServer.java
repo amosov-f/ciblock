@@ -1,10 +1,21 @@
 package ru.devlot;
 
+import org.apache.commons.cli.*;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.jetbrains.annotations.NotNull;
 
-public class LotDeveloperEngine {
+@SuppressWarnings("AccessStaticViaInstance")
+public class CiBlockServer {
+    private static final char OPT_USER = 'u';
+    private static final char OPT_PASSWORD = 'p';
+
+    private static final Options OPTIONS = new Options();
+    static {
+        OPTIONS.addOption(OptionBuilder.hasArg().isRequired().withDescription("server binding port").create(OPT_USER));
+        OPTIONS.addOption(OptionBuilder.hasArgs().isRequired().withDescription("list of app configuration properties files").create(OPT_PASSWORD));
+    }
 
     public static String username;
     public static String password;
@@ -21,12 +32,11 @@ public class LotDeveloperEngine {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length < 2) {
-            throw new Exception("No username or password");
-        }
+        CommandLineParser cmdParser = new GnuParser();
+        CommandLine cmd = cmdParser.parse(OPTIONS, args);
 
-        username = args[0];
-        password = args[1];
+        username = cmd.getOptionValue(OPT_USER);
+        password = cmd.getOptionValue(OPT_PASSWORD);
 
         Server server = new Server();
 

@@ -7,7 +7,8 @@ import com.google.gdata.data.spreadsheet.CellFeed;
 import com.google.gdata.data.spreadsheet.ListEntry;
 import com.google.gdata.data.spreadsheet.ListFeed;
 import com.google.gdata.util.ServiceException;
-import ru.devlot.LotDeveloperEngine;
+import org.jetbrains.annotations.NotNull;
+import ru.devlot.CiBlockServer;
 import ru.devlot.model.Factor;
 import ru.devlot.model.Spreadsheet;
 
@@ -18,18 +19,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import static ru.devlot.LotDeveloperEngine.SERVER_NAME;
-import static ru.devlot.LotDeveloperEngine.SLEEP_TIME;
+import static ru.devlot.CiBlockServer.SERVER_NAME;
+import static ru.devlot.CiBlockServer.SLEEP_TIME;
 import static ru.devlot.model.Factor.Class.ExpandingClass;
 import static ru.devlot.model.Vector.ExpandingVector;
 
 @ThreadSafe
 public class SpreadsheetDepot {
-
+    @NotNull
     private Spreadsheet spreadsheet;
 
     private static final String KEY = "tC-ZyoR2ayny8PP0JKBUDLw";
 
+    @NotNull
     private final String worksheetId;
 
     private static final long RECENT_TIME;
@@ -43,7 +45,7 @@ public class SpreadsheetDepot {
 
     private final CountDownLatch latch = new CountDownLatch(1);
 
-    public SpreadsheetDepot(String worksheetId) {
+    public SpreadsheetDepot(@NotNull final String worksheetId) {
         this.worksheetId = worksheetId;
         new Thread(() -> {
             while (!Thread.interrupted()) {
@@ -66,6 +68,7 @@ public class SpreadsheetDepot {
         }).start();
     }
 
+    @NotNull
     public Spreadsheet get() {
         try {
             latch.await();
@@ -79,7 +82,7 @@ public class SpreadsheetDepot {
         Spreadsheet.ExpandingSpreadsheet spreadsheet = new Spreadsheet.ExpandingSpreadsheet();
 
         SpreadsheetService service = new SpreadsheetService("ciblock-1.0.0");
-        service.setUserCredentials(LotDeveloperEngine.username, LotDeveloperEngine.password);
+        service.setUserCredentials(CiBlockServer.username, CiBlockServer.password);
         service.setProtocolVersion(SpreadsheetService.Versions.V3);
 
         URL cellFeedUrl = new URL("https://spreadsheets.google.com/feeds/cells/" + KEY + "/" + worksheetId + "/private/full?max-row=1&min-col=2");

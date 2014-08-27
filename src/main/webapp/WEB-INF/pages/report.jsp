@@ -61,7 +61,7 @@
                     <%
                         } else {
                     %>
-                            <%= value.getValue().intValue() %>
+                            <%= Math.max(value.getValue().intValue(), 0) %>
                     <%
                         }
                         if (answer.getDimension() != null) {

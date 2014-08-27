@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ru.devlot.LotDeveloperEngine.SLEEP_TIME;
+import static ru.devlot.CiBlockServer.SLEEP_TIME;
 import static ru.devlot.db.SpreadsheetDepot.DataDepot;
 import static ru.devlot.db.SpreadsheetDepot.InfoDepot;
 import static ru.devlot.model.Factor.Feature;

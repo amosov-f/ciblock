@@ -101,7 +101,8 @@
 
             $.ajax({
                 url: '/submit',
-                data: 'feature_json=' + JSON.stringify(features),
+                data: $.param(features),
+                type: 'GET',
                 success: function(report) {
                     $('#report').html(report);
                 }

@@ -1,5 +1,6 @@
 package ru.devlot.db;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Required;
 import ru.devlot.model.Factor;
 import ru.devlot.model.Factor.Answer;
@@ -21,7 +22,7 @@ import weka.core.Instances;
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.*;
 
-import static ru.devlot.LotDeveloperEngine.SLEEP_TIME;
+import static ru.devlot.CiBlockServer.SLEEP_TIME;
 import static ru.devlot.db.SpreadsheetDepot.DataDepot;
 import static ru.devlot.model.Factor.Class.ExpandingClass;
 import static ru.devlot.model.Factor.Feature;
@@ -42,10 +43,10 @@ public class ClassifierDepot {
     private static final Map<
             java.lang.Class<? extends Answer>,
             List<java.lang.Class<? extends Classifier>>
-    > type2classifiers = new HashMap<>();
+    > TYPE_2_CLASSIFIERS = new HashMap<>();
     static {
-        type2classifiers.put(Regression.class, Arrays.asList(LeastMedSq.class, SMOreg.class));
-        type2classifiers.put(ExpandingClass.class, Arrays.asList(BayesNet.class));
+        TYPE_2_CLASSIFIERS.put(Regression.class, Arrays.asList(LeastMedSq.class, SMOreg.class));
+        TYPE_2_CLASSIFIERS.put(ExpandingClass.class, Arrays.asList(BayesNet.class));
     }
 
     public void init() {
@@ -70,6 +71,7 @@ public class ClassifierDepot {
         }).start();
     }
 
+    @NotNull
     public synchronized Map<String, Value> classify(Map<String, Double> features) throws Exception {
         Instance instance = new DenseInstance(features.size() + 1);
         for (String name : features.keySet()) {
@@ -92,6 +94,7 @@ public class ClassifierDepot {
         return answers;
     }
 
+    @NotNull
     public Spreadsheet get() {
         return data;
     }
@@ -153,10 +156,10 @@ public class ClassifierDepot {
             learn.setClass(answerAttribute);
 
 
-            Classifier classifier = type2classifiers.get(answer.getClass()).iterator().next().newInstance();
+            Classifier classifier = TYPE_2_CLASSIFIERS.get(answer.getClass()).iterator().next().newInstance();
             double bestQuality = -1;
 
-            for (java.lang.Class<? extends Classifier> classifierClass : type2classifiers.get(answer.getClass())) {
+            for (java.lang.Class<? extends Classifier> classifierClass : TYPE_2_CLASSIFIERS.get(answer.getClass())) {
                 Classifier curClassifier = classifierClass.newInstance();
                 curClassifier.buildClassifier(learn);
 
