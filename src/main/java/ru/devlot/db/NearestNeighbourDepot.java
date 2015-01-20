@@ -1,5 +1,6 @@
 package ru.devlot.db;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Required;
 import ru.devlot.model.Info;
 import ru.devlot.model.Spreadsheet;
@@ -23,13 +24,17 @@ import static ru.devlot.model.Factor.Feature;
 
 @ThreadSafe
 public class NearestNeighbourDepot {
-
+    @NotNull
     private DataDepot dataDepot;
+    @NotNull
     private InfoDepot infoDepot;
 
+    @NotNull
     private Map<String, Attribute> attributes;
 
+    @NotNull
     private Spreadsheet data;
+    @NotNull
     private Spreadsheet info;
 
     private LinearNNSearch search;
@@ -56,26 +61,26 @@ public class NearestNeighbourDepot {
     }
 
     private void train() throws Exception {
-        Spreadsheet data = dataDepot.get();
-        Spreadsheet info = infoDepot.get();
+        final Spreadsheet data = dataDepot.get();
+        final Spreadsheet info = infoDepot.get();
 
-        Attribute idAttribute = new Attribute(ID, (List<String>) null);
+        final Attribute idAttribute = new Attribute(ID, (List<String>) null);
 
-        Map<String, Attribute> attributes = new HashMap<>();
-        for (Feature feature : data.getFeatures()) {
+        final Map<String, Attribute> attributes = new HashMap<>();
+        for (final Feature feature : data.getFeatures()) {
             attributes.put(feature.getName(), new Attribute(feature.getName()));
         }
         attributes.put(ID, idAttribute);
 
-        Instances learn = new Instances("knn", new ArrayList<>(attributes.values()), data.size());
+        final Instances learn = new Instances("knn", new ArrayList<>(attributes.values()), data.size());
         learn.setClass(idAttribute);
-        for (Vector x : data) {
+        for (final Vector x : data) {
             if (!info.get(x.getId()).contains(REFERENCE)) {
                 continue;
             }
 
-            Instance instance = new DenseInstance(attributes.size());
-            for (Feature feature : data.getFeatures()) {
+            final Instance instance = new DenseInstance(attributes.size());
+            for (final Feature feature : data.getFeatures()) {
                 instance.setValue(attributes.get(feature.getName()), x.getDouble(feature.getName()));
             }
             instance.setValue(idAttribute, x.getId());
@@ -83,7 +88,7 @@ public class NearestNeighbourDepot {
             learn.add(instance);
         }
 
-        LinearNNSearch search = new LinearNNSearch(learn);
+        final LinearNNSearch search = new LinearNNSearch(learn);
 
         synchronized (this) {
             this.data = data;
@@ -93,15 +98,16 @@ public class NearestNeighbourDepot {
         }
     }
 
-    public synchronized List<Info> getKNearestNeighbours(Map<String, Double> x, int k) throws Exception {
-        Instance instance = new DenseInstance(attributes.size());
-        for (Feature feature : data.getFeatures()) {
+    @NotNull
+    public synchronized List<Info> getKNearestNeighbours(@NotNull final Map<String, Double> x, final int k) throws Exception {
+        final Instance instance = new DenseInstance(attributes.size());
+        for (final Feature feature : data.getFeatures()) {
             instance.setValue(attributes.get(feature.getName()), x.get(feature.getName()));
         }
 
-        List<Info> neighbours = new ArrayList<>();
-        for (Instance neighbour : search.kNearestNeighbours(instance, k)) {
-            String id = neighbour.stringValue(attributes.get(ID));
+        final List<Info> neighbours = new ArrayList<>();
+        for (final Instance neighbour : search.kNearestNeighbours(instance, k)) {
+            final String id = neighbour.stringValue(attributes.get(ID));
             neighbours.add(new Info(id, info.get(id).get(REFERENCE)));
         }
 
@@ -109,12 +115,12 @@ public class NearestNeighbourDepot {
     }
 
     @Required
-    public void setDataDepot(DataDepot dataDepot) {
+    public void setDataDepot(@NotNull final DataDepot dataDepot) {
         this.dataDepot = dataDepot;
     }
 
     @Required
-    public void setInfoDepot(InfoDepot infoDepot) {
+    public void setInfoDepot(@NotNull final InfoDepot infoDepot) {
         this.infoDepot = infoDepot;
     }
 

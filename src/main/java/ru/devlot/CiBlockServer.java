@@ -1,5 +1,6 @@
 package ru.devlot;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import org.apache.commons.cli.*;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -11,11 +12,10 @@ public class CiBlockServer {
     private static final char OPT_USER = 'u';
     private static final char OPT_PASSWORD = 'p';
 
-    private static final Options OPTIONS = new Options();
-    static {
-        OPTIONS.addOption(OptionBuilder.hasArg().isRequired().withDescription("server binding port").create(OPT_USER));
-        OPTIONS.addOption(OptionBuilder.hasArgs().isRequired().withDescription("list of app configuration properties files").create(OPT_PASSWORD));
-    }
+    private static final Options OPTIONS = new Options() {{
+        addOption(OptionBuilder.hasArg().isRequired().withDescription("google name").create(OPT_USER));
+        addOption(OptionBuilder.hasArg().isRequired().withDescription("google password").create(OPT_PASSWORD));
+    }};
 
     public static String username;
     public static String password;

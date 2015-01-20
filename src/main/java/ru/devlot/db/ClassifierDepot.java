@@ -24,7 +24,6 @@ import java.util.*;
 
 import static ru.devlot.CiBlockServer.SLEEP_TIME;
 import static ru.devlot.db.SpreadsheetDepot.DataDepot;
-import static ru.devlot.model.Factor.Class.ExpandingClass;
 import static ru.devlot.model.Factor.Feature;
 
 @ThreadSafe
@@ -46,7 +45,7 @@ public class ClassifierDepot {
     > TYPE_2_CLASSIFIERS = new HashMap<>();
     static {
         TYPE_2_CLASSIFIERS.put(Regression.class, Arrays.asList(LeastMedSq.class, SMOreg.class));
-        TYPE_2_CLASSIFIERS.put(ExpandingClass.class, Arrays.asList(BayesNet.class));
+        TYPE_2_CLASSIFIERS.put(Class.ExpandingClass.class, Arrays.asList(BayesNet.class));
     }
 
     public void init() {
