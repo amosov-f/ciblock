@@ -17,3 +17,4 @@ In this project we are developing a web service, that will allow customers to au
 ###Other HOWTOs
 
   - [How to run server on local machine](docs/HowToRunServer.md)
+  - [How to add city block to dataset](docs/HowToAddCityBlock.md) (Russian language)
