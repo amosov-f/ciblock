@@ -42,7 +42,7 @@
             <h1>Рассчет предпроекта</h1>
         </div>
         <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-            <h4>Введите данные по кварталу</h4>
+            <h4>Введите данные по участку</h4>
         <%
             final Feature[] features = (Feature[]) request.getAttribute("features");
             final Vector example = (Vector) request.getAttribute("example");
