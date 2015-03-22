@@ -92,19 +92,23 @@ public class SpreadsheetDepot implements Supplier<Spreadsheet> {
             throw new RecentUpdateException(cellFeed.getUpdated());
         }
 
+        // table reading
         final List<Factor.Class> classes = new ArrayList<>();
         final List<String> names = new ArrayList<>();
         for (final CellEntry cell : cellFeed.getEntries()) {
             final String description = cell.getCell().getValue();
 
             final Factor factor = Factor.parse(description);
-
-            spreadsheet.addFactor(factor);
-
-            if (factor instanceof Factor.Class) {
-                classes.add((Factor.Class) factor);
+            
+            if (factor != null) {
+                spreadsheet.addFactor(factor);
+                if (factor instanceof Factor.Class) {
+                    classes.add((Factor.Class) factor);
+                }
+                names.add(factor.getName());
+            } else {
+                names.add(null);
             }
-            names.add(factor.getName());
         }
 
         final URL listFeedUrl = new URL("https://spreadsheets.google.com/feeds/list/" + KEY + "/" + worksheetId + "/private/full");
@@ -116,7 +120,9 @@ public class SpreadsheetDepot implements Supplier<Spreadsheet> {
             List<String> tags = new ArrayList<>(row.getCustomElements().getTags());
             tags = tags.subList(1, tags.size());
             for (int i = 0; i < tags.size(); ++i) {
-                x.add(names.get(i), row.getCustomElements().getValue(tags.get(i)));
+                if (names.get(i) != null) {
+                    x.add(names.get(i), row.getCustomElements().getValue(tags.get(i)));
+                }
             }
 
             spreadsheet.add(x);

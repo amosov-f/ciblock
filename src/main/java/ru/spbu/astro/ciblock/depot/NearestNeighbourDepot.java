@@ -111,7 +111,7 @@ public final class NearestNeighbourDepot {
 
     @NotNull
     @SuppressWarnings("LocalVariableHidesMemberVariable")
-    public CityBlockInfo[] getKNearestNeighbours(@NotNull final Map<String, Double> x, final int k) {
+    public CityBlockInfo[] getKNearestNeighbours(@NotNull final Map<String, Double> features, final int k) {
         try {
             latch.await();
         } catch (InterruptedException ignored) {
@@ -130,7 +130,7 @@ public final class NearestNeighbourDepot {
 
         final Instance instance = new DenseInstance(attributes.size());
         for (final Factor.Feature feature : data.getFeatures()) {
-            instance.setValue(attributes.get(feature.getName()), x.get(feature.getName()));
+            instance.setValue(attributes.get(feature.getName()), features.get(feature.getName()));
         }
 
         final List<CityBlockInfo> neighbours = new ArrayList<>();

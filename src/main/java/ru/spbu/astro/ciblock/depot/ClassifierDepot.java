@@ -9,6 +9,8 @@ import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.functions.LeastMedSq;
+import weka.classifiers.functions.MultilayerPerceptron;
+import weka.classifiers.functions.SMO;
 import weka.classifiers.functions.SMOreg;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -44,8 +46,8 @@ public final class ClassifierDepot implements Supplier<Spreadsheet> {
     
     private static final Map<Class<? extends Factor.Answer>, List<Class<? extends Classifier>>> CLASSIFIERS 
             = new HashMap<Class<? extends Factor.Answer>, List<Class<? extends Classifier>>>() {{
-        put(Factor.Regression.class, Arrays.asList(LeastMedSq.class, SMOreg.class));
-        put(Factor.Class.class, Collections.singletonList(BayesNet.class));
+        put(Factor.Regression.class, Arrays.asList(LeastMedSq.class, SMOreg.class, MultilayerPerceptron.class));
+        put(Factor.Class.class, Arrays.asList(BayesNet.class, SMO.class));
     }};
 
     @Inject
@@ -174,7 +176,7 @@ public final class ClassifierDepot implements Supplier<Spreadsheet> {
                 classifier.buildClassifier(dataset);
 
                 final Evaluation evaluation = new Evaluation(dataset);
-                evaluation.crossValidateModel(classifier, dataset, 5, new Random());
+                evaluation.crossValidateModel(classifier, dataset, 5, new Random(0));
 
                 final double quality;
                 if (answer instanceof Factor.Class) {
@@ -183,11 +185,20 @@ public final class ClassifierDepot implements Supplier<Spreadsheet> {
                     quality = evaluation.correlationCoefficient();
                 }
 
+                System.out.println("classifier: " + classifier);
+                System.out.println("evaluation: " + evaluation.toSummaryString());
+
                 if (quality > bestQuality) {
                     bestClassifier = classifier;
                     bestQuality = quality;
                 }
             }
+
+            System.out.println("best: " + bestClassifier);
+
+            System.out.println();
+            System.out.println("#######################################################");
+            System.out.println();
 
             final Evaluation evaluation = new Evaluation(dataset);
             evaluation.crossValidateModel(bestClassifier, dataset, 5, new Random());

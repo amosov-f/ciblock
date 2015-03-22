@@ -14,9 +14,6 @@ import java.util.regex.Pattern;
 
 
 public class Factor {
-    private static final String REGRESSION_PREFIX = "$";
-    private static final String CLASS_PREFIX = "#";
-
     @NotNull
     private final String name;
     @Nullable
@@ -27,14 +24,18 @@ public class Factor {
         this.dimension = dimension;
     }
 
-    @NotNull
+    @Nullable
     public static Factor parse(@NotNull final String description) {
-        int start = 0;
-        if (description.startsWith(REGRESSION_PREFIX)) {
-            start = REGRESSION_PREFIX.length();
+        if (description.startsWith("//")) {
+            return null;
         }
-        if (description.startsWith(CLASS_PREFIX)) {
-            start = CLASS_PREFIX.length();
+        
+        int start = 0;
+        if (description.startsWith(Regression.PREFIX)) {
+            start = Regression.PREFIX.length();
+        }
+        if (description.startsWith(Class.PREFIX)) {
+            start = Class.PREFIX.length();
         }
 
         String dimension = null;
@@ -48,10 +49,10 @@ public class Factor {
 
         final String name = description.substring(start, end).trim();
 
-        if (description.startsWith(REGRESSION_PREFIX)) {
+        if (description.startsWith(Regression.PREFIX)) {
             return new Regression(name, dimension);
         }
-        if (description.startsWith(CLASS_PREFIX)) {
+        if (description.startsWith(Class.PREFIX)) {
             return new Factor.Class(name, dimension);
         }
         return new Feature(name, dimension);
@@ -102,17 +103,21 @@ public class Factor {
     }
 
     public static final class Regression extends Answer {
+        private static final String PREFIX = "$";
+        
         private Regression(@NotNull final String name, @Nullable final String dimension) {
             super(name, dimension);
         }
 
         @Override
         public String toString() {
-            return "$" + super.toString();
+            return PREFIX + super.toString();
         }
     }
 
     public static final class Class extends Answer {
+        private static final String PREFIX = "#";
+        
         @NotNull
         private final Set<String> classes = new HashSet<>();
 

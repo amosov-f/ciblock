@@ -18,7 +18,8 @@ public final class ClassifierMeta {
 
     public ClassifierMeta(@NotNull final Classifier classifier,
                           @NotNull final Instances dataset,
-                          final double quality) {
+                          final double quality) 
+    {
         this.classifier = classifier;
         this.dataset = dataset;
         this.quality = quality;
