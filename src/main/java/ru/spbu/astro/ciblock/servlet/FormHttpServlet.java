@@ -2,9 +2,10 @@ package ru.spbu.astro.ciblock.servlet;
 
 import com.google.inject.Inject;
 import org.jetbrains.annotations.NotNull;
-import ru.spbu.astro.ciblock.depot.ClassifierDepot;
-import ru.spbu.astro.ciblock.commons.Spreadsheet;
+import ru.spbu.astro.ciblock.depot.ModelDepot;
+import ru.spbu.astro.ciblock.commons.Worksheet;
 import ru.spbu.astro.ciblock.commons.Vector;
+import ru.spbu.astro.ciblock.depot.SpreadsheetDepot;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -21,20 +22,20 @@ import java.io.IOException;
 @WebServlet("/form")
 public final class FormHttpServlet extends HttpServlet {
     @NotNull
-    private final ClassifierDepot classifierDepot;
+    private final ModelDepot modelDepot;
 
     @Inject
-    public FormHttpServlet(@NotNull final ClassifierDepot classifierDepot) {
-        this.classifierDepot = classifierDepot;
+    public FormHttpServlet(@NotNull final ModelDepot modelDepot) {
+        this.modelDepot = modelDepot;
     }
 
     @Override
     protected void doGet(@NotNull final HttpServletRequest req, 
                          @NotNull final HttpServletResponse resp) throws ServletException, IOException 
     {
-        final Spreadsheet spreadsheet = classifierDepot.get();
-        req.setAttribute("features", spreadsheet.getFeatures());
-        final Vector example = spreadsheet.getVectors().get(0);
+        final Worksheet worksheet = modelDepot.getSpreadsheet().get(SpreadsheetDepot.DATA);
+        req.setAttribute("features", worksheet.getFeatures());
+        final Vector example = worksheet.getVectors().get(0);
         req.setAttribute("example", example);
         req.getRequestDispatcher("pages/form.jsp").forward(req, resp);
     }

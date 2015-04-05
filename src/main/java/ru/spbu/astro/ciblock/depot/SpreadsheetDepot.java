@@ -13,62 +13,81 @@ import org.jetbrains.annotations.NotNull;
 import ru.spbu.astro.ciblock.commons.Factor;
 import ru.spbu.astro.ciblock.commons.Spreadsheet;
 import ru.spbu.astro.ciblock.commons.Vector;
+import ru.spbu.astro.ciblock.commons.Worksheet;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
+@Singleton
 @ThreadSafe
-public class SpreadsheetDepot implements Supplier<Spreadsheet> {
-    private static final Logger LOGGER = Logger.getLogger(SpreadsheetDepot.class.getName());
-    
+public final class SpreadsheetDepot implements Supplier<Spreadsheet> {
+    private static final Logger LOG = Logger.getLogger(SpreadsheetDepot.class.getName());
+
+    public static final String DATA = "od6";
+    public static final String INFO = "od4";
+
     private static final String KEY = "1LSpPXxsrMTiFDyBz08OTYh0xRhyou-21f-k1xfGPHPs";
+    private static final String[] WORKSHEET_IDS = {DATA, INFO};
 
     private volatile Spreadsheet spreadsheet;
-    
-    @NotNull
-    private final String worksheetId;
+
     @NotNull
     private final String username;
     @NotNull
     private final String password;
     private final long recentTime;
 
+    private final ExecutorService executor = Executors.newScheduledThreadPool(2);
+
     @NotNull
     private final CountDownLatch latch = new CountDownLatch(1);
 
-    public SpreadsheetDepot(@NotNull final String worksheetId, @NotNull final Properties properties) {
-        this.worksheetId = worksheetId;
+    @Inject
+    public SpreadsheetDepot(@NotNull final Properties properties) {
         username = properties.getProperty("username");
         password = properties.getProperty("password");
         recentTime = Long.parseLong(properties.getProperty("ciblock.spreadsheet.recent"));
-        Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    upload();
-                } catch (RecentUpdateException e) {
-                    LOGGER.warning(e.getLocalizedMessage());
-                } catch (ServiceException | IOException | RuntimeException e) {
-                    LOGGER.log(Level.SEVERE, "Upload errror!", e);
+        Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
+            final Map<String, Future<Worksheet>> futureWorksheets = new HashMap<>();
+            for (final String worksheetId : WORKSHEET_IDS) {
+                futureWorksheets.put(worksheetId, executor.submit(new Callable<Worksheet>() {
+                    @Override
+                    public Worksheet call() throws Exception {
+                        return upload(worksheetId);
+                    }
+                }));
+            }
+            try {
+                @SuppressWarnings("LocalVariableHidesMemberVariable")
+                final Spreadsheet spreadsheet = new Spreadsheet();
+                for (final String worksheetId : futureWorksheets.keySet()) {
+                    spreadsheet.add(worksheetId, futureWorksheets.get(worksheetId).get());
                 }
+                this.spreadsheet = spreadsheet;
+                latch.countDown();
+            } catch (ExecutionException e) {
+                if (e.getCause() != null && e.getCause() instanceof RecentUpdateException) {
+                    LOG.warning(e.getLocalizedMessage());
+                } else {
+                    LOG.log(Level.SEVERE, "Upload errror!", e);
+                }
+            } catch (InterruptedException ignored) {
+                Thread.currentThread().interrupt();
+                LOG.warning("Uploader interrupted!");
             }
         }, 0, Long.parseLong(properties.getProperty("ciblock.spreadsheet.retry_delay")), TimeUnit.SECONDS);
     }
 
     @NotNull
     @Override
-    public final Spreadsheet get() {
+    public Spreadsheet get() {
         try {
             latch.await();
         } catch (InterruptedException ignored) {
@@ -77,9 +96,9 @@ public class SpreadsheetDepot implements Supplier<Spreadsheet> {
         return spreadsheet;
     }
 
-    @SuppressWarnings("LocalVariableHidesMemberVariable")
-    private void upload() throws ServiceException, IOException, RecentUpdateException {
-        final Spreadsheet spreadsheet = new Spreadsheet();
+    @NotNull
+    private Worksheet upload(@NotNull final String worksheetId) throws ServiceException, IOException, RecentUpdateException {
+        final Worksheet worksheet = new Worksheet();
 
         final SpreadsheetService service = new SpreadsheetService("ciblock-1.0.0");
         service.setUserCredentials(username, password);
@@ -101,7 +120,7 @@ public class SpreadsheetDepot implements Supplier<Spreadsheet> {
             final Factor factor = Factor.parse(description);
             
             if (factor != null) {
-                spreadsheet.addFactor(factor);
+                worksheet.addFactor(factor);
                 if (factor instanceof Factor.Class) {
                     classes.add((Factor.Class) factor);
                 }
@@ -125,7 +144,7 @@ public class SpreadsheetDepot implements Supplier<Spreadsheet> {
                 }
             }
 
-            spreadsheet.add(x);
+            worksheet.add(x);
 
             for (final Factor.Class clazz : classes) {
                 final String value = x.get(clazz.getName());
@@ -134,27 +153,7 @@ public class SpreadsheetDepot implements Supplier<Spreadsheet> {
                 }
             }
         }
-
-        this.spreadsheet = spreadsheet;
-        latch.countDown();
-    }
-
-    @Singleton
-    @ThreadSafe
-    public static class DataDepot extends SpreadsheetDepot {
-        @Inject
-        public DataDepot(@NotNull final Properties properties) {
-            super("od6", properties);
-        }
-    }
-
-    @Singleton
-    @ThreadSafe
-    public static class InfoDepot extends SpreadsheetDepot {
-        @Inject
-        public InfoDepot(@NotNull final Properties properties) {
-            super("od4", properties);
-        }
+        return worksheet;
     }
 
     public static class RecentUpdateException extends Exception {

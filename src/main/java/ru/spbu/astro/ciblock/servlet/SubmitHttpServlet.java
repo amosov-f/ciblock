@@ -2,9 +2,9 @@ package ru.spbu.astro.ciblock.servlet;
 
 import com.google.inject.Inject;
 import org.jetbrains.annotations.NotNull;
-import ru.spbu.astro.ciblock.depot.ClassifierDepot;
-import ru.spbu.astro.ciblock.depot.NearestNeighbourDepot;
-import ru.spbu.astro.ciblock.commons.Spreadsheet;
+import ru.spbu.astro.ciblock.depot.ModelDepot;
+import ru.spbu.astro.ciblock.commons.Worksheet;
+import ru.spbu.astro.ciblock.depot.SpreadsheetDepot;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -26,16 +26,11 @@ public final class SubmitHttpServlet extends HttpServlet {
     private static final int K = 3;
     
     @NotNull
-    private final ClassifierDepot classifierDepot;
-    @NotNull
-    private final NearestNeighbourDepot nearestNeighbourDepot;
+    private final ModelDepot modelDepot;
 
     @Inject
-    public SubmitHttpServlet(@NotNull final ClassifierDepot classifierDepot, 
-                             @NotNull final NearestNeighbourDepot nearestNeighbourDepot) 
-    {
-        this.classifierDepot = classifierDepot;
-        this.nearestNeighbourDepot = nearestNeighbourDepot;
+    public SubmitHttpServlet(@NotNull final ModelDepot modelDepot) {
+        this.modelDepot = modelDepot;
     }
 
     @Override
@@ -47,15 +42,15 @@ public final class SubmitHttpServlet extends HttpServlet {
             features.put(name, new Double(req.getParameter(name)));
         }
 
-        final Spreadsheet spreadsheet = classifierDepot.get();
+        final Worksheet worksheet = modelDepot.getSpreadsheet().get(SpreadsheetDepot.DATA);
 
-        req.setAttribute("features", spreadsheet.getFeatures());
-        req.setAttribute("answers", spreadsheet.getAnswers());
+        req.setAttribute("features", worksheet.getFeatures());
+        req.setAttribute("answers", worksheet.getAnswers());
 
         req.setAttribute("feature values", features);
-        req.setAttribute("values", classifierDepot.classify(features));
+        req.setAttribute("values", modelDepot.classify(features));
 
-        req.setAttribute("nearest neighbours", nearestNeighbourDepot.getKNearestNeighbours(features, K));
+        req.setAttribute("nearest neighbours", modelDepot.getKNearestNeighbours(features, K));
 
         req.getRequestDispatcher("pages/report.jsp").forward(req, resp);
     }

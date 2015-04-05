@@ -9,7 +9,7 @@ import weka.core.Instances;
  * Date: 22.02.15
  * Time: 22:54
  */
-public final class ClassifierMeta {
+public final class ClassifierMeta implements Comparable<ClassifierMeta> {
     @NotNull
     private final Classifier classifier;
     @NotNull
@@ -37,5 +37,10 @@ public final class ClassifierMeta {
 
     public double getQuality() {
         return quality;
+    }
+
+    @Override
+    public int compareTo(@NotNull final ClassifierMeta meta) {
+        return Double.compare(quality, meta.quality);
     }
 }

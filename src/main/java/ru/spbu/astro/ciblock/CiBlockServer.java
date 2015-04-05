@@ -12,9 +12,7 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.jetbrains.annotations.NotNull;
-import ru.spbu.astro.ciblock.depot.ClassifierDepot;
-import ru.spbu.astro.ciblock.depot.NearestNeighbourDepot;
-import ru.spbu.astro.ciblock.depot.SpreadsheetDepot;
+import ru.spbu.astro.ciblock.depot.ModelDepot;
 import ru.spbu.astro.ciblock.servlet.AdminHttpServlet;
 import ru.spbu.astro.ciblock.servlet.FormHttpServlet;
 import ru.spbu.astro.ciblock.servlet.HowHttpServlet;
@@ -66,10 +64,7 @@ public final class CiBlockServer {
             @Override
             protected void configure() {
                 bind(Properties.class).toInstance(properties);
-                bind(SpreadsheetDepot.DataDepot.class);
-                bind(SpreadsheetDepot.InfoDepot.class);
-                bind(ClassifierDepot.class);
-                bind(NearestNeighbourDepot.class);
+                bind(ModelDepot.class);
                 for (final Class<? extends HttpServlet> servlet : SERVLETS) {
                     bind(servlet).asEagerSingleton();
                 }

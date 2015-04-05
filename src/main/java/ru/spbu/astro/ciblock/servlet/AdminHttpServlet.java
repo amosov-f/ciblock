@@ -2,7 +2,7 @@ package ru.spbu.astro.ciblock.servlet;
 
 import com.google.inject.Inject;
 import org.jetbrains.annotations.NotNull;
-import ru.spbu.astro.ciblock.commons.Spreadsheet;
+import ru.spbu.astro.ciblock.commons.Worksheet;
 import ru.spbu.astro.ciblock.depot.SpreadsheetDepot;
 
 import javax.servlet.ServletException;
@@ -20,22 +20,22 @@ import java.io.IOException;
 @WebServlet("/admin")
 public final class AdminHttpServlet extends HttpServlet {
     @NotNull
-    private final SpreadsheetDepot.DataDepot dataDepot;
+    private final SpreadsheetDepot spreadsheetDepot;
 
     @Inject
-    public AdminHttpServlet(@NotNull final SpreadsheetDepot.DataDepot dataDepot) {
-        this.dataDepot = dataDepot;
+    public AdminHttpServlet(@NotNull final SpreadsheetDepot spreadsheetDepot) {
+        this.spreadsheetDepot = spreadsheetDepot;
     }
 
     @Override
     protected void doGet(@NotNull final HttpServletRequest req, 
                          @NotNull final HttpServletResponse resp) throws ServletException, IOException 
     {
-        final Spreadsheet spreadsheet = dataDepot.get();
+        final Worksheet worksheet = spreadsheetDepot.get().get(SpreadsheetDepot.DATA);
 
-        req.setAttribute("squares", spreadsheet.getDoubles("площадь"));
-        req.setAttribute("altitudes", spreadsheet.getDoubles("высота"));
-        req.setAttribute("perimeters", spreadsheet.getDoubles("периметр"));
+        req.setAttribute("squares", worksheet.getDoubles("площадь"));
+        req.setAttribute("altitudes", worksheet.getDoubles("высота"));
+        req.setAttribute("perimeters", worksheet.getDoubles("периметр"));
 
         req.getRequestDispatcher("pages/admin.jsp").forward(req, resp);
     }
