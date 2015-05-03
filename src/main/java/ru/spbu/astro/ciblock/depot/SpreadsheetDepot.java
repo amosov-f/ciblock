@@ -10,6 +10,7 @@ import com.google.gdata.util.ServiceException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.spbu.astro.ciblock.commons.Factor;
 import ru.spbu.astro.ciblock.commons.Spreadsheet;
 import ru.spbu.astro.ciblock.commons.Vector;
@@ -115,9 +116,9 @@ public final class SpreadsheetDepot implements Supplier<Spreadsheet> {
         final List<Factor.Class> classes = new ArrayList<>();
         final List<String> names = new ArrayList<>();
         for (final CellEntry cell : cellFeed.getEntries()) {
-            final String description = cell.getCell().getValue();
+            final String description = commented(cell.getCell().getValue());
 
-            final Factor factor = Factor.parse(description);
+            final Factor factor = description != null ? Factor.parse(description) : null;
             
             if (factor != null) {
                 worksheet.addFactor(factor);
@@ -140,7 +141,7 @@ public final class SpreadsheetDepot implements Supplier<Spreadsheet> {
             tags = tags.subList(1, tags.size());
             for (int i = 0; i < tags.size(); ++i) {
                 if (names.get(i) != null) {
-                    x.add(names.get(i), row.getCustomElements().getValue(tags.get(i)));
+                    x.add(names.get(i), commented(row.getCustomElements().getValue(tags.get(i))));
                 }
             }
 
@@ -154,6 +155,11 @@ public final class SpreadsheetDepot implements Supplier<Spreadsheet> {
             }
         }
         return worksheet;
+    }
+
+    @Nullable
+    private static String commented(@Nullable final String value) {
+        return value == null || value.startsWith("//") ? null : value;
     }
 
     public static class RecentUpdateException extends Exception {

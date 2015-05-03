@@ -26,10 +26,6 @@ public class Factor {
 
     @Nullable
     public static Factor parse(@NotNull final String description) {
-        if (description.startsWith("//")) {
-            return null;
-        }
-        
         int start = 0;
         if (description.startsWith(Regression.PREFIX)) {
             start = Regression.PREFIX.length();

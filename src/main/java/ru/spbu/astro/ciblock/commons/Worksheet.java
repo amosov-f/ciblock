@@ -37,20 +37,17 @@ public final class Worksheet {
     @NotNull
     @SuppressWarnings("LocalVariableHidesMemberVariable")
     public Factor[] getFactors() {
-        final List<Factor> factors = getFactors(Factor.class); 
-        return factors.toArray(new Factor[factors.size()]);
+        return getFactors(Factor.class).stream().toArray(Factor[]::new);
     }
 
     @NotNull
     public Factor.Feature[] getFeatures() {
-        final List<Factor.Feature> features = getFactors(Factor.Feature.class);
-        return features.toArray(new Factor.Feature[features.size()]);
+        return getFactors(Factor.Feature.class).stream().toArray(Factor.Feature[]::new);
     }
 
     @NotNull
     public Factor.Answer[] getAnswers() {
-        final List<Factor.Answer> answers = getFactors(Factor.Answer.class);
-        return answers.toArray(new Factor.Answer[answers.size()]);
+        return getFactors(Factor.Answer.class).stream().toArray(Factor.Answer[]::new);
     }
 
     public int size() {
