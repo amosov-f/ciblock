@@ -1,17 +1,17 @@
 package ru.spbu.astro.ciblock.depot;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jetbrains.annotations.NotNull;
 import ru.spbu.astro.ciblock.commons.*;
 import ru.spbu.astro.ciblock.commons.Vector;
+import ru.spbu.astro.ciblock.ml.PolynomialRegression;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.BayesNet;
-import weka.classifiers.functions.LeastMedSq;
-import weka.classifiers.functions.MultilayerPerceptron;
 import weka.classifiers.functions.SMO;
-import weka.classifiers.functions.SMOreg;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -22,6 +22,7 @@ import weka.core.neighboursearch.NearestNeighbourSearch;
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,16 +44,19 @@ public final class ModelDepot {
     private final SpreadsheetDepot spreadsheetDepot;
 
     @NotNull
-    private final ExecutorService executor = Executors.newScheduledThreadPool(10);
+    private final ExecutorService executor = Executors.newScheduledThreadPool(1);
 
     @NotNull
     private final CountDownLatch latch = new CountDownLatch(1);
     
-    private static final Map<Class<? extends Factor.Answer>, List<Class<? extends Classifier>>> CLASSIFIERS 
-            = new HashMap<Class<? extends Factor.Answer>, List<Class<? extends Classifier>>>() {{
-        put(Factor.Regression.class, Arrays.asList(LeastMedSq.class, SMOreg.class, MultilayerPerceptron.class));
-        put(Factor.Class.class, Arrays.asList(BayesNet.class, SMO.class));
-    }};
+    private static final Multimap<Class<? extends Factor.Answer>, Supplier<? extends Classifier>> CLASSIFIERS = HashMultimap.create();
+    static {
+        for (int d = 1; d <= 5; d++) {
+            final int deg = d;
+            CLASSIFIERS.put(Factor.Regression.class, () -> new PolynomialRegression(deg));
+        }
+        CLASSIFIERS.putAll(Factor.Class.class, Arrays.asList(BayesNet::new, SMO::new));
+    };
 
     @Inject
     public ModelDepot(@NotNull final SpreadsheetDepot spreadsheetDepot, @NotNull final Properties properties) {
@@ -167,7 +171,7 @@ public final class ModelDepot {
         final Map<String, Attribute> attributes = attributes(data);
         LOG.info("Training...");
         final Map<String, Future<ClassifierMeta>> metaFutures = new HashMap<>();
-        for (final Factor.Answer answer : data.getAnswers())
+        for (final Factor.Answer answer : data.getAnswers()) {
             metaFutures.put(answer.getName(), executor.submit(new Callable<ClassifierMeta>() {
                 @Override
                 public ClassifierMeta call() throws Exception {
@@ -176,22 +180,23 @@ public final class ModelDepot {
                             attributes,
                             answer.getName(),
                             answer instanceof Factor.Class ? (instance, answerAttribute, x) -> instance.setValue(answerAttribute, x.get(answerAttribute.name()))
-                                                           : (instance, answerAttribute, x) -> instance.setValue(answerAttribute, x.getDouble(answerAttribute.name()))
+                                    : (instance, answerAttribute, x) -> instance.setValue(answerAttribute, x.getDouble(answerAttribute.name()))
 
                     );
 
                     final List<ClassifierMeta> metas = new ArrayList<>();
-                    for (final Class<? extends Classifier> classifierClass : CLASSIFIERS.get(answer.getClass())) {
-                        metas.add(train(classifierClass.newInstance(), dataset, answer instanceof Factor.Class));
+                    for (final Supplier<? extends Classifier> classifierFactory : CLASSIFIERS.get(answer.getClass())) {
+                        metas.add(train(classifierFactory.get(), dataset, answer instanceof Factor.Class));
                     }
 
-                    final ClassifierMeta bestClassifierMeta = Collections.min(metas);
+                    final ClassifierMeta bestClassifierMeta = Collections.max(metas);
                     final Classifier classifier = bestClassifierMeta.getClassifier();
                     classifier.buildClassifier(dataset);
                     LOG.info("Best classifier: " + bestClassifierMeta.getClassifier());
                     return bestClassifierMeta;
                 }
             }));
+        }
         final Future<NearestNeighbourSearch> searchFuture = executor.submit(new Callable<NearestNeighbourSearch>() {
             @Override
             public NearestNeighbourSearch call() throws Exception {
@@ -267,7 +272,6 @@ public final class ModelDepot {
             }
 
             model.setAnswerValue(instance, answerAttribute, x);
-
             dataset.add(instance);
         }
         dataset.setClass(answerAttribute);
@@ -281,7 +285,7 @@ public final class ModelDepot {
     {
         classifier.buildClassifier(dataset);
         final Evaluation evaluation = new Evaluation(dataset);
-        evaluation.crossValidateModel(classifier, dataset, 5, new Random(0));
+        evaluation.crossValidateModel(classifier, dataset, dataset.size(), new Random(0));
         final double quality = fMeasure ? evaluation.weightedFMeasure() : evaluation.correlationCoefficient();
 
         LOG.info("Classifier: " + classifier);
