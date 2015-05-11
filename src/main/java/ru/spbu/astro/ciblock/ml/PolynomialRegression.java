@@ -27,7 +27,7 @@ public class PolynomialRegression extends AbstractClassifier {
 
     public PolynomialRegression(final int deg) {
         this.deg = deg;
-        regression.setRidge(0.02);
+        regression.setRidge(0.03);
     }
 
     @Override
@@ -110,7 +110,8 @@ public class PolynomialRegression extends AbstractClassifier {
     }
 
     public static void main(String[] args) {
-        final List<int[]> degs = tuples(3, 4);
+        final List<int[]> degs = tuples(5, 3);
+        System.out.println(degs.size());
         for (final int[] d : degs) {
             System.out.println(Arrays.toString(d));
         }
