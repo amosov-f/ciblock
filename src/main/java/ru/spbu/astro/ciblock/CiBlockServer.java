@@ -13,6 +13,8 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.jetbrains.annotations.NotNull;
 import ru.spbu.astro.ciblock.depot.ModelDepot;
+import ru.spbu.astro.ciblock.provider.FileProvider;
+import ru.spbu.astro.ciblock.provider.WorksheetProvider;
 import ru.spbu.astro.ciblock.servlet.AdminHttpServlet;
 import ru.spbu.astro.ciblock.servlet.FormHttpServlet;
 import ru.spbu.astro.ciblock.servlet.HowHttpServlet;
@@ -25,7 +27,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-public final class CiBlockServer {
+public enum CiBlockServer {
+    ;
+
     private static final Logger LOGGER = Logger.getLogger(CiBlockServer.class.getName());
 
     private static final String OPT_PORT = "port";
@@ -47,9 +51,6 @@ public final class CiBlockServer {
             HowHttpServlet.class
     );
 
-    private CiBlockServer() {
-    }
-
     public static void main(@NotNull final String[] args) throws Exception {
         final CommandLine cmd = new GnuParser().parse(OPTIONS, args);
         final int port = Integer.parseInt(cmd.getOptionValue(OPT_PORT));
@@ -65,6 +66,7 @@ public final class CiBlockServer {
             protected void configure() {
                 bind(Properties.class).toInstance(properties);
                 bind(ModelDepot.class);
+                bind(WorksheetProvider.class).to(FileProvider.class);
                 for (final Class<? extends HttpServlet> servlet : SERVLETS) {
                     bind(servlet).asEagerSingleton();
                 }

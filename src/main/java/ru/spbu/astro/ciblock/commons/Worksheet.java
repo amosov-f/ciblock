@@ -29,13 +29,11 @@ public final class Worksheet {
     }
 
     @NotNull
-    @SuppressWarnings("unchecked")
     private <T extends Factor> List<T> getFactors(@NotNull final Class<T> clazz) {
         return factors.stream().filter(clazz::isInstance).map(clazz::cast).collect(Collectors.toList());
     }
 
     @NotNull
-    @SuppressWarnings("LocalVariableHidesMemberVariable")
     public Factor[] getFactors() {
         return getFactors(Factor.class).stream().toArray(Factor[]::new);
     }

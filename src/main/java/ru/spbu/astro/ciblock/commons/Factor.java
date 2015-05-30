@@ -24,7 +24,7 @@ public class Factor {
         this.dimension = dimension;
     }
 
-    @Nullable
+    @NotNull
     public static Factor parse(@NotNull final String description) {
         int start = 0;
         if (description.startsWith(Regression.PREFIX)) {

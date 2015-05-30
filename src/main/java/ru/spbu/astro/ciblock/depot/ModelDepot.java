@@ -172,41 +172,35 @@ public final class ModelDepot {
         LOG.info("Training...");
         final Map<String, Future<ClassifierMeta>> metaFutures = new HashMap<>();
         for (final Factor.Answer answer : data.getAnswers()) {
-            metaFutures.put(answer.getName(), executor.submit(new Callable<ClassifierMeta>() {
-                @Override
-                public ClassifierMeta call() throws Exception {
-                    final Instances dataset = dataset(
-                            spreadsheet,
-                            attributes,
-                            answer.getName(),
-                            answer instanceof Factor.Class ? (instance, answerAttribute, x) -> instance.setValue(answerAttribute, x.get(answerAttribute.name()))
-                                    : (instance, answerAttribute, x) -> instance.setValue(answerAttribute, x.getDouble(answerAttribute.name()))
-
-                    );
-
-                    final List<ClassifierMeta> metas = new ArrayList<>();
-                    for (final Supplier<? extends Classifier> classifierFactory : CLASSIFIERS.get(answer.getClass())) {
-                        metas.add(train(classifierFactory.get(), dataset, answer instanceof Factor.Class));
-                    }
-
-                    final ClassifierMeta bestClassifierMeta = Collections.max(metas);
-                    final Classifier classifier = bestClassifierMeta.getClassifier();
-                    classifier.buildClassifier(dataset);
-                    LOG.info("Best classifier: " + bestClassifierMeta.getClassifier());
-                    return bestClassifierMeta;
-                }
-            }));
-        }
-        final Future<NearestNeighbourSearch> searchFuture = executor.submit(new Callable<NearestNeighbourSearch>() {
-            @Override
-            public NearestNeighbourSearch call() throws Exception {
-                return new LinearNNSearch(dataset(
+            metaFutures.put(answer.getName(), executor.submit(() -> {
+                final Instances dataset = dataset(
                         spreadsheet,
                         attributes,
-                        REFERENCE,
-                        (instance, answerAttribute, x) -> instance.setValue(answerAttribute, x.getId())
-                ));
-            }
+                        answer.getName(),
+                        answer instanceof Factor.Class ? (instance, answerAttribute, x) -> instance.setValue(answerAttribute, x.get(answerAttribute.name()))
+                                : (instance, answerAttribute, x) -> instance.setValue(answerAttribute, x.getDouble(answerAttribute.name()))
+
+                );
+
+                final List<ClassifierMeta> metas = new ArrayList<>();
+                for (final Supplier<? extends Classifier> classifierFactory : CLASSIFIERS.get(answer.getClass())) {
+                    metas.add(train(classifierFactory.get(), dataset, answer instanceof Factor.Class));
+                }
+
+                final ClassifierMeta bestClassifierMeta = Collections.max(metas);
+                final Classifier classifier = bestClassifierMeta.getClassifier();
+                classifier.buildClassifier(dataset);
+                LOG.info("Best classifier: " + bestClassifierMeta.getClassifier());
+                return bestClassifierMeta;
+            }));
+        }
+        final Future<NearestNeighbourSearch> searchFuture = executor.submit(() -> {
+            return new LinearNNSearch(dataset(
+                    spreadsheet,
+                    attributes,
+                    REFERENCE,
+                    (instance, answerAttribute, x) -> instance.setValue(answerAttribute, x.getId())
+            ));
         });
 
         final Map<String, ClassifierMeta> metas = new HashMap<>();
@@ -295,6 +289,6 @@ public final class ModelDepot {
     }
 
     public interface Model {
-        void setAnswerValue(@NotNull final Instance instance, @NotNull Attribute answerAttribute, @NotNull final Vector x);
+        void setAnswerValue(@NotNull Instance instance, @NotNull Attribute answerAttribute, @NotNull Vector x);
     }
 }
