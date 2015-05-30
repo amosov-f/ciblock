@@ -9,10 +9,7 @@ import ru.spbu.astro.ciblock.commons.Worksheet;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * User: amosov-f
@@ -20,25 +17,24 @@ import java.util.Properties;
  * Time: 16:39
  */
 public final class FileProvider extends AbstractWorksheetProvider {
-
     @Inject
     public FileProvider(@NotNull final Properties properties) {
         super(properties);
     }
 
     @NotNull
+    @Override
     public Worksheet uploadImpl(@NotNull final String worksheetId) throws IOException {
         final Worksheet worksheet = new Worksheet();
         final String[][] table = ((List<String>) FileUtils.readLines(new File(worksheetId))).stream()
                 .map(line -> line.split("\t"))
                 .toArray(String[][]::new);
 
-        final List<Factor.Class> classes = new ArrayList<>();
         final List<String> names = new ArrayList<>();
-        final String[] titles = table[0];
-        for (int i = 1; i < titles.length; i++) {
-            if (!isCommented(titles[i])) {
-                final Factor factor = Factor.parse(titles[i]);
+        final List<Factor.Class> classes = new ArrayList<>();
+        for (final String title : Arrays.copyOfRange(table[0], 1, table[0].length)) {
+            if (!isCommented(title)) {
+                final Factor factor = Factor.parse(title);
                 worksheet.addFactor(factor);
                 if (factor instanceof Factor.Class) {
                     classes.add((Factor.Class) factor);
@@ -49,12 +45,11 @@ public final class FileProvider extends AbstractWorksheetProvider {
             }
         }
 
-        for (int i = 1; i < table.length; i++) {
-            final String[] row = table[i];
+        for (final String[] row : Arrays.copyOfRange(table, 1, table.length)) {
             final Vector x = new Vector(row[0]);
-            for (int j = 1; j < row.length; ++j) {
-                final String value = row[j];
-                Optional.ofNullable(names.get(j - 1)).ifPresent(name -> x.add(name, commented(value)));
+            for (int i = 1; i < row.length; i++) {
+                final String value = row[i];
+                Optional.ofNullable(names.get(i - 1)).ifPresent(name -> x.add(name, commented(value)));
             }
             worksheet.add(x);
             classes.forEach(clazz -> Optional.ofNullable(x.get(clazz.getName())).ifPresent(clazz::addValue));

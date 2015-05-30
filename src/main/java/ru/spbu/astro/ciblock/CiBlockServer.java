@@ -14,6 +14,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.jetbrains.annotations.NotNull;
 import ru.spbu.astro.ciblock.depot.ModelDepot;
 import ru.spbu.astro.ciblock.provider.FileProvider;
+import ru.spbu.astro.ciblock.provider.GoogleTableProvider;
 import ru.spbu.astro.ciblock.provider.WorksheetProvider;
 import ru.spbu.astro.ciblock.servlet.AdminHttpServlet;
 import ru.spbu.astro.ciblock.servlet.FormHttpServlet;
@@ -24,6 +25,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -39,8 +41,8 @@ public enum CiBlockServer {
 
     private static final Options OPTIONS = new Options() {{
         addOption(OptionBuilder.hasArg().isRequired().withDescription("server port").create(OPT_PORT));
-        addOption(OptionBuilder.hasArg().isRequired().withDescription("google login").create(OPT_USERNAME));
-        addOption(OptionBuilder.hasArg().isRequired().withDescription("google password").create(OPT_PASSWORD));
+        addOption(OptionBuilder.hasArg().withDescription("google login").create(OPT_USERNAME));
+        addOption(OptionBuilder.hasArg().withDescription("google password").create(OPT_PASSWORD));
         addOption(OptionBuilder.hasArgs().isRequired().withDescription("config files").create(OPT_CONFIG));
     }};
 
@@ -58,18 +60,20 @@ public enum CiBlockServer {
         for (final String configPath : cmd.getOptionValues(OPT_CONFIG)) {
             properties.load(CiBlockServer.class.getResourceAsStream(configPath));
         }
-        properties.setProperty("username", cmd.getOptionValue(OPT_USERNAME));
-        properties.setProperty("password", cmd.getOptionValue(OPT_PASSWORD));
+        Optional.ofNullable(cmd.getOptionValue(OPT_USERNAME)).ifPresent(username -> properties.setProperty("username", username));
+        Optional.ofNullable(cmd.getOptionValue(OPT_PASSWORD)).ifPresent(password -> properties.setProperty("password", password));
 
         final Injector injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(Properties.class).toInstance(properties);
                 bind(ModelDepot.class);
-                bind(WorksheetProvider.class).to(FileProvider.class);
-                for (final Class<? extends HttpServlet> servlet : SERVLETS) {
-                    bind(servlet).asEagerSingleton();
+                if ("google".equals(properties.getProperty("ciblock.spreadsheet"))) {
+                    bind(WorksheetProvider.class).to(GoogleTableProvider.class);
+                } else {
+                    bind(WorksheetProvider.class).to(FileProvider.class);
                 }
+                SERVLETS.forEach(servlet -> bind(servlet).asEagerSingleton());
             }
         });
 
@@ -81,12 +85,10 @@ public enum CiBlockServer {
 
         final WebAppContext context = new WebAppContext();
         context.setWar("web");
-        for (final Class<? extends HttpServlet> servlet : SERVLETS) {
-            context.addServlet(
-                    new ServletHolder(injector.getInstance(servlet)),
-                    servlet.getAnnotation(WebServlet.class).value()[0]
-            );
-        }
+        SERVLETS.forEach(servlet -> context.addServlet(
+                new ServletHolder(injector.getInstance(servlet)),
+                servlet.getAnnotation(WebServlet.class).value()[0]
+        ));
         server.setHandler(context);
 
         server.start();
